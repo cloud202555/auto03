@@ -101,4 +101,14 @@ public class SparePartTransactionController {
             return ResponseEntity.badRequest().body(ResponseDto.error("Failed to retrieve transactions", e.getMessage()));
         }
     }
+    @GetMapping("/vehicleRegId")
+    public ResponseEntity<ResponseDto<List<SparePartTransactionDto>>> getByVehicleRegId(@RequestParam Integer vehicleRegId) {
+        try {
+            List<SparePartTransactionDto> transactions = transactionService.getByVehicleRegId(vehicleRegId);
+            return ResponseEntity.ok(ResponseDto.success("Transactions retrieved successfully", transactions));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDto.error("No transactions found for Vehicle Registration ID", e.getMessage()));
+        }
+    }
+
 }

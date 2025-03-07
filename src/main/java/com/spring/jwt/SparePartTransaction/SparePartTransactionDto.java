@@ -24,4 +24,5 @@ public class SparePartTransactionDto {
     private LocalDateTime transactionDate;
     private Integer userId;
     private String billNo;
+    private Integer vehicleRegId;
 }

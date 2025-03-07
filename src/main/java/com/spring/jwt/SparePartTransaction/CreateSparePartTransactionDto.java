@@ -13,4 +13,5 @@ public class CreateSparePartTransactionDto {
     private Integer quantity;
     private Integer userId;
     private String billNo;
+    private Integer vehicleRegId;
 }
