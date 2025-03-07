@@ -19,4 +19,6 @@ public interface VehicleRegRepository extends JpaRepository<VehicleReg, Integer>
     List<VehicleReg> findByStatus(String status);
 
     Optional<Object> findByAppointmentId(Integer appointmentId);
+
+    Optional<Object> findUserIdByVehicleRegId(Integer vehicleRegId);
 }

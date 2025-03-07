@@ -4,6 +4,7 @@ import com.spring.jwt.SparePart.SparePart;
 import com.spring.jwt.SparePart.SparePartRepo;
 import com.spring.jwt.UserParts.UserPart;
 import com.spring.jwt.UserParts.UserPartRepository;
+import com.spring.jwt.VehicleReg.VehicleRegRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,20 +23,45 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
     @Autowired
     private UserPartRepository userPartRepository;
+    @Autowired
+    private VehicleRegRepository vehicleRegRepository;
 
 
     @Override
     public SparePartTransactionDto createTransaction(CreateSparePartTransactionDto transactionDto) {
-        SparePart sparePart = (SparePart) sparePartRepository.findByPartNumber(transactionDto.getPartNumber())
-                .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
-        UserPart userPart = userPartRepository.findBySparePart_SparePartId(sparePart.getSparePartId())
-                .orElseThrow(() -> new IllegalArgumentException("No stock entry found for Spare Part ID: " + sparePart.getSparePartId()));
+        // Validate transaction type
         if (transactionDto.getTransactionType() != TransactionType.CREDIT && transactionDto.getTransactionType() != TransactionType.DEBIT) {
             throw new IllegalArgumentException("Invalid transaction type! Allowed values: CREDIT or DEBIT.");
         }
-        if (transactionDto.getTransactionType() == TransactionType.CREDIT && (transactionDto.getBillNo() == null || transactionDto.getBillNo().trim().isEmpty())) {
+
+        Integer userId = transactionDto.getUserId();
+
+        // For DEBIT transactions, ensure vehicleRegId is provided and fetch userId if necessary
+        if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
+            if (transactionDto.getVehicleRegId() == null) {
+                throw new IllegalArgumentException("Vehicle Registration ID is required for DEBIT transactions.");
+            }
+            if (userId == null) {
+                userId = (Integer) vehicleRegRepository.findUserIdByVehicleRegId(transactionDto.getVehicleRegId())
+                        .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + transactionDto.getVehicleRegId()));
+            }
+        }
+
+        // Fetch spare part
+        SparePart sparePart = (SparePart) sparePartRepository.findByPartNumber(transactionDto.getPartNumber())
+                .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
+
+        // Fetch user part stock
+        UserPart userPart = userPartRepository.findBySparePart_SparePartId(sparePart.getSparePartId())
+                .orElseThrow(() -> new IllegalArgumentException("No stock entry found for Spare Part ID: " + sparePart.getSparePartId()));
+
+        // CREDIT transactions require a bill number
+        if (transactionDto.getTransactionType() == TransactionType.CREDIT &&
+                (transactionDto.getBillNo() == null || transactionDto.getBillNo().trim().isEmpty())) {
             throw new IllegalArgumentException("Bill number is required for CREDIT transactions.");
         }
+
+        // Handle DEBIT transaction
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (transactionDto.getQuantity() <= 0) {
                 throw new IllegalArgumentException("For DEBIT transactions, quantity must be greater than 0.");
@@ -45,30 +71,35 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             }
             userPart.setQuantity(userPart.getQuantity() - transactionDto.getQuantity());
         }
+
+        // Handle CREDIT transaction (stock increment)
         if (transactionDto.getTransactionType() == TransactionType.CREDIT) {
             userPart.setQuantity(userPart.getQuantity() + transactionDto.getQuantity());
         }
+
+        // Save updated stock
         userPartRepository.save(userPart);
+
+        // Create transaction entity
         SparePartTransaction transaction = SparePartTransaction.builder()
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
                 .partName(sparePart.getPartName())
                 .manufacturer(sparePart.getManufacturer())
                 .price(sparePart.getPrice())
-                .qtyPrice(sparePart.getPrice() * transactionDto.getQuantity())  // Total price calculation
+                .qtyPrice(sparePart.getPrice() * transactionDto.getQuantity())
                 .updateAt(sparePart.getUpdateAt())
                 .transactionType(transactionDto.getTransactionType())
                 .quantity(transactionDto.getQuantity())
-                .transactionDate(java.time.LocalDateTime.now())
-                .userId(transactionDto.getUserId())
-                .billNo(transactionDto.getBillNo()) // Ensuring bill number is included
+                .transactionDate(LocalDateTime.now())
+                .userId(userId)
+                .billNo(transactionDto.getBillNo())
                 .build();
 
+        // Save transaction
         transaction = transactionRepository.save(transaction);
         return toDto(transaction);
     }
-
-
 
 
 
@@ -140,6 +171,23 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<SparePartTransactionDto> getByVehicleRegId(Integer vehicleRegId) throws RuntimeException {
+
+        if (vehicleRegId == null) {
+            throw new IllegalArgumentException("Vehicle Registration ID cannot be null.");
+        }
+        Integer userId = (Integer) vehicleRegRepository.findUserIdByVehicleRegId(vehicleRegId)
+                .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + vehicleRegId));
+        List<SparePartTransaction> transactions = transactionRepository.findByUserId(userId);
+        if (transactions.isEmpty()) {
+            throw new RuntimeException("No transactions found for Vehicle Registration ID: " + vehicleRegId);
+        }
+
+        return transactions.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
 
     @Override
     public List<SparePartTransactionDto> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate) {
