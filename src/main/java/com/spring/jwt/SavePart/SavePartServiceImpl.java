@@ -18,7 +18,6 @@ public class SavePartServiceImpl implements SavePartService {
     @Autowired
     private SparePartRepo sparePartRepository;
 
-    @Override
     public String savePart(SavePartDto savePartDto) {
         if (savePartDto.getUserId() == null || savePartDto.getUserId() <= 0) {
             throw new IllegalArgumentException("Invalid User ID");
@@ -28,19 +27,29 @@ public class SavePartServiceImpl implements SavePartService {
             throw new IllegalArgumentException("Invalid Spare Part ID");
         }
 
+        // Check if user exists
         boolean userExists = userRepository.existsById(Long.valueOf(savePartDto.getUserId()));
-        if (!userExists) {
-            throw new RuntimeException("User not found with ID: " + savePartDto.getUserId());
-        }
-
         boolean sparePartExists = sparePartRepository.existsById(savePartDto.getSparePartId());
-        if (!sparePartExists) {
+
+        if (!userExists && !sparePartExists) {
+            throw new RuntimeException("User ID " + savePartDto.getUserId() + " and Spare Part ID " + savePartDto.getSparePartId() + " not found.");
+        } else if (!userExists) {
+            throw new RuntimeException("User not found with ID: " + savePartDto.getUserId());
+        } else if (!sparePartExists) {
             throw new RuntimeException("Spare part not found with ID: " + savePartDto.getSparePartId());
         }
+
+        // Check if the same userId and sparePartId already exist
+        boolean alreadyExists = savePartRepository.existsByUserIdAndSparePartId(savePartDto.getUserId(), savePartDto.getSparePartId());
+        if (alreadyExists) {
+            throw new RuntimeException("Spare Part with ID " + savePartDto.getSparePartId() + " is already saved for User ID " + savePartDto.getUserId());
+        }
+
         SavePart savePart = new SavePart(savePartDto);
         savePartRepository.save(savePart);
         return "Spare Part saved successfully";
     }
+
 
 
     @Override

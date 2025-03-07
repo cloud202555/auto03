@@ -12,4 +12,6 @@ public interface SavePartRepository extends JpaRepository<SavePart, Integer> {
     List<SavePart> findByUserId(Integer userId);
 
     Optional<SavePart> findByUserIdAndSparePartId(int userId, Integer sparePartId);
+
+    boolean existsByUserIdAndSparePartId(Integer userId, Integer sparePartId);
 }
