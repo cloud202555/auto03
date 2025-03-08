@@ -26,7 +26,6 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
     @Autowired
     private VehicleRegRepository vehicleRegRepository;
 
-
     @Override
     public SparePartTransactionDto createTransaction(CreateSparePartTransactionDto transactionDto) {
         // Validate transaction type
@@ -36,14 +35,21 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         Integer userId = transactionDto.getUserId();
 
-        // For DEBIT transactions, ensure vehicleRegId is provided and fetch userId if necessary
+        // For CREDIT transactions, vehicleRegId must be null
+        if (transactionDto.getTransactionType() == TransactionType.CREDIT && transactionDto.getVehicleRegId() != null) {
+            throw new IllegalArgumentException("Vehicle Registration ID must be null for CREDIT transactions.");
+        }
+
+        // For DEBIT transactions, userId should be provided OR fetched using vehicleRegId
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
-            if (transactionDto.getVehicleRegId() == null) {
-                throw new IllegalArgumentException("Vehicle Registration ID is required for DEBIT transactions.");
-            }
-            if (userId == null) {
+            if (userId == null && transactionDto.getVehicleRegId() != null) {
                 userId = (Integer) vehicleRegRepository.findUserIdByVehicleRegId(transactionDto.getVehicleRegId())
                         .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + transactionDto.getVehicleRegId()));
+            }
+
+            // If neither userId nor vehicleRegId is provided, throw an error
+            if (userId == null) {
+                throw new IllegalArgumentException("Either userId or vehicleRegId must be provided for DEBIT transactions.");
             }
         }
 
@@ -61,7 +67,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             throw new IllegalArgumentException("Bill number is required for CREDIT transactions.");
         }
 
-        // Handle DEBIT transaction
+        // Handle DEBIT transaction (stock reduction)
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (transactionDto.getQuantity() <= 0) {
                 throw new IllegalArgumentException("For DEBIT transactions, quantity must be greater than 0.");
@@ -94,6 +100,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .transactionDate(LocalDateTime.now())
                 .userId(userId)
                 .billNo(transactionDto.getBillNo())
+                .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null) // Ensure null for CREDIT
                 .build();
 
         // Save transaction
