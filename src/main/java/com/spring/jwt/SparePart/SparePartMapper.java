@@ -58,4 +58,5 @@ public class SparePartMapper {
                 .map(photo -> Base64.getDecoder().decode(photo))
                 .collect(Collectors.toList());
     }
+
 }
