@@ -34,41 +34,6 @@ public class SparePartServiceImpl implements SparePartService {
     public final UserPartRepository userPartRepo;
     public static final Logger logger = LoggerFactory.getLogger(SparePartServiceImpl.class);
 
-//    @Override
-//    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, Long partNumber, List<MultipartFile> photos) {
-//        try {
-//            List<byte[]> compressedPhotos = photos.stream()
-//                    .map(file -> {
-//                        try {
-//                            return ImageCompressionUtil.compressImage(file.getBytes());
-//                        } catch (IOException e) {
-//                            throw new RuntimeException("Failed to compress image", e);
-//                        }
-//                    })
-//                    .toList();
-//
-//            SparePart sparePart = SparePart.builder()
-//                    .partName(partName)
-//                    .description(description)
-//                    .manufacturer(manufacturer)
-//                    .price(price)
-//                    .partNumber(partNumber)
-//                    .photo(compressedPhotos)
-//                    .updateAt(LocalDate.now())
-//                    .build();
-//
-//            sparePartRepo.save(sparePart);
-//            return new BaseResponseDTO("Success", "Part Added Successfully");
-//
-//        } catch (DataIntegrityViolationException e) {
-//            logger.error("Duplicate part number error: ", e);
-//            throw new BadRequestException("Part number " + partNumber + " already exists.");
-//        } catch (RuntimeException e) {
-//            logger.error("Error processing images: ", e);
-//            throw new BadRequestException("Failed to process images");
-//        }
-//    }
-
     @Override
     public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, Long partNumber, List<MultipartFile> photos) {
         try {
