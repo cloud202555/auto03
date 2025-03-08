@@ -119,6 +119,7 @@ public class AppConfig {
                 .authenticationEntryPoint(
                         ((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
+
                 .accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
                 .addFilterBefore(new JwtUsernamePasswordAuthenticationFilter(manager, jwtConfig, jwtService), UsernamePasswordAuthenticationFilter.class)
