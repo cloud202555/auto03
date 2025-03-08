@@ -1,6 +1,8 @@
 package com.spring.jwt.SparePart;
 
 import com.spring.jwt.MapperClasses.SparePartMappers;
+import com.spring.jwt.UserParts.UserPart;
+import com.spring.jwt.UserParts.UserPartRepository;
 import com.spring.jwt.VehicleReg.BadRequestException;
 import com.spring.jwt.exception.SparePartNotFoundException;
 import com.spring.jwt.utils.BaseResponseDTO;
@@ -28,6 +30,8 @@ public class SparePartServiceImpl implements SparePartService {
 
     public final SparePartMapper sparePartMapper;
 
+    public final UserPartRepository userPartRepo;
+
     public static final Logger logger = LoggerFactory.getLogger(SparePartServiceImpl.class);
 
     @Override
@@ -43,6 +47,7 @@ public class SparePartServiceImpl implements SparePartService {
                     })
                     .toList();
 
+            // Create SparePart entity
             SparePart sparePart = SparePart.builder()
                     .partName(partName)
                     .description(description)
@@ -53,7 +58,26 @@ public class SparePartServiceImpl implements SparePartService {
                     .updateAt(LocalDate.now())
                     .build();
 
-            sparePartRepo.save(sparePart);
+            // Save SparePart first
+            sparePart = sparePartRepo.save(sparePart);
+
+            // Create UserPart entity with quantity = 0
+            UserPart userPart = UserPart.builder()
+                    .partName(partName)
+                    .description(description)
+                    .manufacturer(manufacturer)
+                    .price(price)
+                    .partNumber(partNumber)
+                    .photo(compressedPhotos)
+                    .updateAt(LocalDate.now())
+                    .quantity(0) // Set quantity to 0
+                    .sparePart(sparePart) // Associate with the saved SparePart
+                    .lastUpdate(LocalDate.now().toString())
+                    .build();
+
+            // Save UserPart
+            userPartRepo.save(userPart);
+
             return new BaseResponseDTO("Success", "Part Added Successfully");
 
         } catch (DataIntegrityViolationException e) {
@@ -64,6 +88,7 @@ public class SparePartServiceImpl implements SparePartService {
             throw new BadRequestException("Failed to process images");
         }
     }
+
 
     @Override
     public SparePartDto getSparePartById(Integer id) {
