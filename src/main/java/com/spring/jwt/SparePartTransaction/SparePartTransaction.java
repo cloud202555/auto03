@@ -59,7 +59,7 @@ public class SparePartTransaction {
     @Column(name = "billNo", nullable = false)
     private String billNo;
 
-    @Column(name = "vehicleRegId", nullable = false)
+    @Column(name = "vehicleRegId")
     private Integer vehicleRegId;
 
 
