@@ -2,9 +2,7 @@ package com.spring.jwt.SparePart;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
+
 public class SparePartDto {
 
     private Integer sparePartId;
@@ -35,4 +34,5 @@ public class SparePartDto {
 
     @NotNull(message = "Part number is required.")
     private Long partNumber;
+
 }

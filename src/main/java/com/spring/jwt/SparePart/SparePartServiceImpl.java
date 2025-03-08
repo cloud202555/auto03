@@ -5,7 +5,6 @@ import com.spring.jwt.VehicleReg.BadRequestException;
 import com.spring.jwt.exception.SparePartNotFoundException;
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ImageCompressionUtil;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
