@@ -47,7 +47,6 @@ public class UserPart {
     @Column(name = "part_number", nullable = false)
     private Long partNumber;
 
-
     @ManyToOne
     @JoinColumn(name = "sparePartId", referencedColumnName = "sparePartId")
     private SparePart sparePart;
