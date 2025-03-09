@@ -47,7 +47,6 @@ public class SparePartServiceImpl implements SparePartService {
                     })
                     .toList();
 
-            // Create SparePart entity
             SparePart sparePart = SparePart.builder()
                     .partName(partName)
                     .description(description)
@@ -58,10 +57,8 @@ public class SparePartServiceImpl implements SparePartService {
                     .updateAt(LocalDate.now())
                     .build();
 
-            // Save SparePart first
             sparePart = sparePartRepo.save(sparePart);
 
-            // Create UserPart entity with quantity = 0
             UserPart userPart = UserPart.builder()
                     .partName(partName)
                     .description(description)
@@ -70,12 +67,11 @@ public class SparePartServiceImpl implements SparePartService {
                     .partNumber(partNumber)
                     .photo(compressedPhotos)
                     .updateAt(LocalDate.now())
-                    .quantity(0) // Set quantity to 0
-                    .sparePart(sparePart) // Associate with the saved SparePart
+                    .quantity(0)
+                    .sparePart(sparePart)
                     .lastUpdate(LocalDate.now().toString())
                     .build();
 
-            // Save UserPart
             userPartRepo.save(userPart);
 
             return new BaseResponseDTO("Success", "Part Added Successfully");

@@ -23,8 +23,10 @@ public class SparePartMapper {
                 .price(entity.getPrice())
                 .updateAt(entity.getUpdateAt())
                 .partNumber(entity.getPartNumber())
+                .photo(convertPhotosToBase64(entity.getPhoto()))
                 .build();
     }
+
 
     public SparePart toEntity(SparePartDto dto) {
         if (dto == null) {

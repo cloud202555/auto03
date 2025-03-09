@@ -108,6 +108,7 @@ public class AppConfig {
                 .requestMatchers("/sparePartManagement/**").permitAll()
                 .requestMatchers("/sparePartTransactions/**").permitAll()
                 .requestMatchers("/save-part/**").permitAll()
+                .requestMatchers("/Filter/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)
@@ -118,6 +119,7 @@ public class AppConfig {
                 .authenticationEntryPoint(
                         ((request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 )
+
                 .accessDeniedHandler(new CustomAccessDeniedHandler())
                 .and()
                 .addFilterBefore(new JwtUsernamePasswordAuthenticationFilter(manager, jwtConfig, jwtService), UsernamePasswordAuthenticationFilter.class)
@@ -132,7 +134,7 @@ public class AppConfig {
             @Override
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(Arrays.asList("https://cartechindia.com", "http://localhost:5173", "http://localhost:63342","https://cffffftasting-production.up.railway.app","https://localhost","https://localhost:3000"));
+                config.setAllowedOrigins(Arrays.asList("https://autocarcares.com", "http://localhost:5173","https://cffffftasting-production.up.railway.app","https://localhost:3000"));
                 config.setAllowedMethods(Collections.singletonList("*"));
                 config.setAllowCredentials(true);
                 config.setAllowedHeaders(Collections.singletonList("*"));
