@@ -62,6 +62,9 @@ public class SparePartTransaction {
     @Column(name = "vehicleRegId")
     private Integer vehicleRegId;
 
+    @Column(name = "customerName")
+    private String customerName;
+
 
 //    @ManyToOne
 //    @JoinColumn(name = "sparePart_id", nullable = false)
