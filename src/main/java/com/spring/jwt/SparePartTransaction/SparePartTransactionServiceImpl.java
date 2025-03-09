@@ -36,9 +36,9 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
         Integer userId = transactionDto.getUserId();
 
         // For CREDIT transactions, vehicleRegId must be null
-        if (transactionDto.getTransactionType() == TransactionType.CREDIT && transactionDto.getVehicleRegId() != null) {
-            throw new IllegalArgumentException("Vehicle Registration ID must be null for CREDIT transactions.");
-        }
+//        if (transactionDto.getTransactionType() == TransactionType.CREDIT && transactionDto.getVehicleRegId() != null) {
+//            throw new IllegalArgumentException("Vehicle Registration ID must be null for CREDIT transactions.");
+//        }
 
         // For DEBIT transactions, userId should be provided OR fetched using vehicleRegId
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
