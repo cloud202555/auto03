@@ -196,6 +196,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public List<SparePartTransactionDto> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate == null || endDate == null) {
@@ -263,5 +264,4 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .customerName(transaction.getCustomerName())
                 .build();
     }
-
 }
