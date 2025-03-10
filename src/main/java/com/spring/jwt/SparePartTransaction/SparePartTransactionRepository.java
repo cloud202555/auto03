@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface SparePartTransactionRepository extends JpaRepository<SparePartTransaction, Integer> {
+
+    List<SparePartTransaction> findByVehicleRegId(Integer vehicleRegID);
     List<SparePartTransaction> findByUserId(Integer userId);
 
     List<SparePartTransaction> findByTransactionDateBetween(LocalDateTime startDate, LocalDateTime endDate);
