@@ -35,18 +35,6 @@ public class VehicleRegServiceImpl implements VehicleRegService {
     @Override
     public VehicleRegDto createVehicleReg(VehicleRegDto vehicleRegDto) {
 
-        if (vehicleRegDto.getAppointmentId() != null) {
-            Appointment appointment = appointmentRepository.findById(vehicleRegDto.getAppointmentId())
-                    .orElseThrow(() -> new RuntimeException("Appointment not found"));
-
-            if ("completed".equalsIgnoreCase(appointment.getStatus())) {
-                throw new BadRequestException("This appointment is already completed");
-            }
-
-            appointment.setStatus("completed");
-            appointmentRepository.save(appointment);
-        }
-
         VehicleReg vehicleReg = new VehicleReg();
         copyDtoToEntity(vehicleRegDto, vehicleReg);
         vehicleReg = vehicleRegRepository.save(vehicleReg);
@@ -110,15 +98,25 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         return new VehicleRegDto(vehicleReg);
     }
 
-
-
     private void copyDtoToEntity(VehicleRegDto vehicleRegDto, VehicleReg vehicleReg) {
         vehicleReg.setVehicleRegId(vehicleRegDto.getVehicleRegId());
         vehicleReg.setAppointmentId(vehicleRegDto.getAppointmentId());
+
+        vehicleReg.setVehicleNumber(vehicleRegDto.getVehicleNumber());
+        vehicleReg.setVehicleBrand(vehicleRegDto.getVehicleBrand());
+        vehicleReg.setVehicleModelName(vehicleRegDto.getVehicleModelName());
+        vehicleReg.setVehicleVariant(vehicleRegDto.getVehicleVariant());
+        vehicleReg.setEngineNumber(vehicleRegDto.getEngineNumber());
         vehicleReg.setChasisNumber(vehicleRegDto.getChasisNumber());
+        vehicleReg.setNumberPlateColour(vehicleRegDto.getNumberPlateColour());
+
+        vehicleReg.setCustomerId(vehicleRegDto.getCustomerId());
+        vehicleReg.setCustomerName(vehicleRegDto.getCustomerName());
         vehicleReg.setCustomerAddress(vehicleRegDto.getCustomerAddress());
+        vehicleReg.setCustomerMobileNumber(vehicleRegDto.getCustomerMobileNumber());
         vehicleReg.setCustomerAadharNo(vehicleRegDto.getCustomerAadharNo());
         vehicleReg.setCustomerGstin(vehicleRegDto.getCustomerGstin());
+
         vehicleReg.setSuperwiser(vehicleRegDto.getSuperwiser());
         vehicleReg.setTechnician(vehicleRegDto.getTechnician());
         vehicleReg.setWorker(vehicleRegDto.getWorker());
@@ -126,4 +124,5 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         vehicleReg.setUserId(vehicleRegDto.getUserId());
         vehicleReg.setDate(vehicleRegDto.getDate());
     }
+
 }

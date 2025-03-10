@@ -19,6 +19,19 @@ public class UserPartDto {
     private String manufacturer;
     private Long price;
     private LocalDate updateAt;
-    private List<byte[]> photo;
     private Long partNumber;
+
+    public UserPartDto(UserPart userPart) {
+        this.userPartId = userPart.getUserPartId();
+        this.lastUpdate = userPart.getLastUpdate();
+        this.partNumber = userPart.getPartNumber();
+        this.updateAt = userPart.getUpdateAt();
+        this.price = userPart.getPrice();
+        this.manufacturer = userPart.getManufacturer();
+        this.description = userPart.getDescription();
+        this.partName = userPart.getPartName();
+        this.quantity = userPart.getQuantity();
+
+    }
+
 }

@@ -6,9 +6,13 @@ import java.util.List;
 
 public interface VehicleRegService {
     VehicleRegDto getVehicleRegById(Integer vehicleRegId);
+
     List<VehicleRegDto> getAllVehicleRegs();
+
     VehicleRegDto createVehicleReg(VehicleRegDto vehicleRegDto);
+
     VehicleRegDto updateVehicleReg(Integer vehicleRegId, VehicleRegDto vehicleRegDto);
+
     void deleteVehicleReg(Integer vehicleRegId);
 
     List<VehicleRegDto> getByStatus(String status);
