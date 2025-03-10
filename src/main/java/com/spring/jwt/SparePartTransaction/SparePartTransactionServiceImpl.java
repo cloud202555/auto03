@@ -99,7 +99,6 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null) // Ensure null for CREDIT
                 .build();
 
-        // Save transaction
         transaction = transactionRepository.save(transaction);
         return toDto(transaction);
     }

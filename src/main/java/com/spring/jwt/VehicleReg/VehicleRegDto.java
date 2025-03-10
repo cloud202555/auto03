@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class VehicleRegDto {
     private Integer vehicleRegId;
+    private Integer appointmentId;
 
     private String vehicleNumber;
     private String vehicleBrand;
@@ -34,6 +35,7 @@ public class VehicleRegDto {
 
     public VehicleRegDto(VehicleReg vehicleReg) {
         this.vehicleRegId = vehicleReg.getVehicleRegId();
+        this.appointmentId = vehicleReg.getAppointmentId();
         this.vehicleNumber = vehicleReg.getVehicleNumber();
         this.vehicleBrand = vehicleReg.getVehicleBrand();
         this.vehicleModelName = vehicleReg.getVehicleModelName();

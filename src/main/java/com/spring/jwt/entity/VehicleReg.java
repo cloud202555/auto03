@@ -27,6 +27,10 @@ public class VehicleReg {
     )
     private Integer vehicleRegId;
 
+    @Column
+    private Integer appointmentId;
+
+    // Vehicle details
     @Column(length = 45)
     private String vehicleNumber;
 
@@ -43,7 +47,7 @@ public class VehicleReg {
     private String engineNumber;
 
     @Column(length = 45)
-    private String chasisNumber;  // Already exists (serving as the Chase number)
+    private String chasisNumber;
 
     @Column(length = 45)
     private String numberPlateColour;
@@ -91,6 +95,7 @@ public class VehicleReg {
 
     public VehicleReg(VehicleRegDto vehicleRegDto) {
         this.vehicleRegId = vehicleRegDto.getVehicleRegId();
+        this.appointmentId = vehicleRegDto.getAppointmentId();
         this.vehicleNumber = vehicleRegDto.getVehicleNumber();
         this.vehicleBrand = vehicleRegDto.getVehicleBrand();
         this.vehicleModelName = vehicleRegDto.getVehicleModelName();
