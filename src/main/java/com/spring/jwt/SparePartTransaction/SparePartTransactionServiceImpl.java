@@ -201,7 +201,6 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .findById(vehicleRegId)
                 .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + vehicleRegId));
         Integer userId = vehicleReg.getUserId();
-
         List<SparePartTransaction> transactions = transactionRepository.findByUserId(userId);
 
         if (transactions.isEmpty()) {
