@@ -111,4 +111,17 @@ public class SparePartTransactionController {
         }
     }
 
+    @GetMapping("/byPartNumberAndDates")
+    public ResponseEntity<ResponseDto<List<SparePartTransactionDto>>> getByPartNumberAndTransactionsBetweenDates(
+            @RequestParam Integer sparePartId,
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        try {
+            List<SparePartTransactionDto> transactions = transactionService.getByPartNumberAndTransactionsBetweenDates(sparePartId, startDate, endDate);
+            return ResponseEntity.ok(ResponseDto.success("Transactions retrieved successfully", transactions));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDto.error("No transactions found for the given criteria", e.getMessage()));
+        }
+    }
+
 }

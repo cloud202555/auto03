@@ -22,4 +22,7 @@ public interface SparePartTransactionService {
     public List<SparePartTransactionDto> getByVehicleRegId(Integer vehicleRegId);
 
     List<SparePartTransactionDto> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate);
+
+    List<SparePartTransactionDto> getByPartNumberAndTransactionsBetweenDates(Integer sparePartId, LocalDateTime startDate, LocalDateTime endDate);
+
 }

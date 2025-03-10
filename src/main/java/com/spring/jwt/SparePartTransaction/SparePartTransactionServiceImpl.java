@@ -87,6 +87,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .sparePartId(sparePart.getSparePartId())
                 .partName(sparePart.getPartName())
                 .manufacturer(sparePart.getManufacturer())
+                .customerName(transactionDto.getCustomerName())
                 .price(sparePart.getPrice())
                 .qtyPrice(sparePart.getPrice() * transactionDto.getQuantity())
                 .updateAt(sparePart.getUpdateAt())
@@ -135,6 +136,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
         existingTransaction.setTransactionDate(transactionDto.getTransactionDate());
         existingTransaction.setUserId(transactionDto.getUserId());
         existingTransaction.setBillNo(transactionDto.getBillNo());
+        existingTransaction.setCustomerName(transactionDto.getCustomerName());
 
         existingTransaction = transactionRepository.save(existingTransaction);
         return toDto(existingTransaction);
@@ -211,6 +213,40 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<SparePartTransactionDto> getByPartNumberAndTransactionsBetweenDates(Integer sparePartId, LocalDateTime startDate, LocalDateTime endDate) {
+        // Validate input parameters
+        if (sparePartId == null) {
+            throw new IllegalArgumentException("Spare Part ID cannot be null.");
+        }
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date cannot be null.");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
+
+        // Check if the spare part exists
+        SparePart sparePart = sparePartRepository.findById(sparePartId)
+                .orElseThrow(() -> new RuntimeException("Spare part not found with ID: " + sparePartId));
+
+        // Fetch transactions within the date range for the given spare part ID
+        List<SparePartTransaction> transactions = transactionRepository.findBySparePartIdAndTransactionDateBetween(
+                sparePartId, startDate, endDate);
+
+        // Handle the case when no transactions are found
+        if (transactions.isEmpty()) {
+            throw new RuntimeException("No transactions found for Spare Part ID: " + sparePartId +
+                    " between " + startDate + " and " + endDate);
+        }
+
+        // Convert to DTO and return
+        return transactions.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+
 
     // Entity to DTO conversion
     private SparePartTransactionDto toDto(SparePartTransaction transaction) {
@@ -228,6 +264,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .transactionDate(transaction.getTransactionDate())
                 .userId(transaction.getUserId())
                 .billNo(transaction.getBillNo())
+                .customerName(transaction.getCustomerName())
                 .build();
     }
+
 }
