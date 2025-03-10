@@ -110,6 +110,7 @@ public class AppConfig {
                 .requestMatchers("/save-part/**").permitAll()
                 .requestMatchers("/Filter/**").permitAll()
                 .requestMatchers("/userParts/**").permitAll()
+                .requestMatchers("/pdf/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)

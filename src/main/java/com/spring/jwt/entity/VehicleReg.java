@@ -30,7 +30,6 @@ public class VehicleReg {
     @Column
     private Integer appointmentId;
 
-    // Vehicle details
     @Column(length = 45)
     private String vehicleNumber;
 
@@ -52,7 +51,6 @@ public class VehicleReg {
     @Column(length = 45)
     private String numberPlateColour;
 
-    // Customer details
     @Column
     private Integer customerId;
 
