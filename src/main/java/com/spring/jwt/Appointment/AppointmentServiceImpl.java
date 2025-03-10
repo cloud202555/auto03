@@ -35,6 +35,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = AppointmentMapper.toEntity(appointmentDto);
         appointment = appointmentRepository.save(appointment);
         return AppointmentMapper.toDto(appointment);
+
     }
 
     @Override

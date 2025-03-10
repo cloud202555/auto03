@@ -109,6 +109,7 @@ public class AppConfig {
                 .requestMatchers("/sparePartTransactions/**").permitAll()
                 .requestMatchers("/save-part/**").permitAll()
                 .requestMatchers("/Filter/**").permitAll()
+                .requestMatchers("/userParts/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)

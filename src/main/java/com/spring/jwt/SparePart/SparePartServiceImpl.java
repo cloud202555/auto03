@@ -65,7 +65,6 @@ public class SparePartServiceImpl implements SparePartService {
                     .manufacturer(manufacturer)
                     .price(price)
                     .partNumber(partNumber)
-                    .photo(compressedPhotos)
                     .updateAt(LocalDate.now())
                     .quantity(0)
                     .sparePart(sparePart)

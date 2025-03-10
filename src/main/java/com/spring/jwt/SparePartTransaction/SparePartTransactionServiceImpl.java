@@ -5,6 +5,7 @@ import com.spring.jwt.SparePart.SparePartRepo;
 import com.spring.jwt.UserParts.UserPart;
 import com.spring.jwt.UserParts.UserPartRepository;
 import com.spring.jwt.VehicleReg.VehicleRegRepository;
+import com.spring.jwt.entity.VehicleReg;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,7 +20,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
     private SparePartTransactionRepository transactionRepository;
 
     @Autowired
-    private SparePartRepo sparePartRepository;  // Assuming you have a SparePart entity & repository
+    private SparePartRepo sparePartRepository;
 
     @Autowired
     private UserPartRepository userPartRepository;
@@ -28,7 +29,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
     @Override
     public SparePartTransactionDto createTransaction(CreateSparePartTransactionDto transactionDto) {
-        // Validate transaction type
+
         if (transactionDto.getTransactionType() != TransactionType.CREDIT && transactionDto.getTransactionType() != TransactionType.DEBIT) {
             throw new IllegalArgumentException("Invalid transaction type! Allowed values: CREDIT or DEBIT.");
         }
@@ -40,34 +41,31 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 //            throw new IllegalArgumentException("Vehicle Registration ID must be null for CREDIT transactions.");
 //        }
 
-        // For DEBIT transactions, userId should be provided OR fetched using vehicleRegId
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (userId == null && transactionDto.getVehicleRegId() != null) {
-                userId = (Integer) vehicleRegRepository.findUserIdByVehicleRegId(transactionDto.getVehicleRegId())
+                VehicleReg vehicleReg = (VehicleReg) vehicleRegRepository
+                        .findUserIdByVehicleRegId(transactionDto.getVehicleRegId())
                         .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + transactionDto.getVehicleRegId()));
+                System.err.println("Retrieved VehicleReg ID: " + vehicleReg.getVehicleRegId());
+                userId = vehicleReg.getUserId();
             }
 
-            // If neither userId nor vehicleRegId is provided, throw an error
             if (userId == null) {
                 throw new IllegalArgumentException("Either userId or vehicleRegId must be provided for DEBIT transactions.");
             }
         }
 
-        // Fetch spare part
         SparePart sparePart = (SparePart) sparePartRepository.findByPartNumber(transactionDto.getPartNumber())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
 
-        // Fetch user part stock
         UserPart userPart = userPartRepository.findBySparePart_SparePartId(sparePart.getSparePartId())
                 .orElseThrow(() -> new IllegalArgumentException("No stock entry found for Spare Part ID: " + sparePart.getSparePartId()));
 
-        // CREDIT transactions require a bill number
         if (transactionDto.getTransactionType() == TransactionType.CREDIT &&
                 (transactionDto.getBillNo() == null || transactionDto.getBillNo().trim().isEmpty())) {
             throw new IllegalArgumentException("Bill number is required for CREDIT transactions.");
         }
 
-        // Handle DEBIT transaction (stock reduction)
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (transactionDto.getQuantity() <= 0) {
                 throw new IllegalArgumentException("For DEBIT transactions, quantity must be greater than 0.");
@@ -78,15 +76,12 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             userPart.setQuantity(userPart.getQuantity() - transactionDto.getQuantity());
         }
 
-        // Handle CREDIT transaction (stock increment)
         if (transactionDto.getTransactionType() == TransactionType.CREDIT) {
             userPart.setQuantity(userPart.getQuantity() + transactionDto.getQuantity());
         }
 
-        // Save updated stock
         userPartRepository.save(userPart);
 
-        // Create transaction entity
         SparePartTransaction transaction = SparePartTransaction.builder()
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
