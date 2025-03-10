@@ -159,11 +159,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
         } else if (transaction.getTransactionType() == TransactionType.DEBIT) {
             userPart.setQuantity(userPart.getQuantity() + transaction.getQuantity()); // Add stock back
         }
-
-        // Save updated UserPart
         userPartRepository.save(userPart);
 
-        // Delete the transaction
         transactionRepository.deleteById(transactionId);
     }
 
@@ -215,6 +212,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+
 
 
     @Override
