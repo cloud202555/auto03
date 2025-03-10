@@ -143,11 +143,31 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
     @Override
     public void deleteTransaction(Integer transactionId) {
-        if (!transactionRepository.existsById(transactionId)) {
-            throw new RuntimeException("Transaction not found with ID: " + transactionId);
+        // Fetch the transaction
+        SparePartTransaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found with ID: " + transactionId));
+
+        // Fetch the associated UserPart
+        UserPart userPart = userPartRepository.findBySparePart_SparePartId(transaction.getSparePartId())
+                .orElseThrow(() -> new RuntimeException("No stock entry found for Spare Part ID: " + transaction.getSparePartId()));
+
+        // Adjust UserPart quantity based on transaction type
+        if (transaction.getTransactionType() == TransactionType.CREDIT) {
+            if (userPart.getQuantity() < transaction.getQuantity()) {
+                throw new RuntimeException("Cannot delete CREDIT transaction: Not enough stock to reverse.");
+            }
+            userPart.setQuantity(userPart.getQuantity() - transaction.getQuantity()); // Reduce stock
+        } else if (transaction.getTransactionType() == TransactionType.DEBIT) {
+            userPart.setQuantity(userPart.getQuantity() + transaction.getQuantity()); // Add stock back
         }
+
+        // Save updated UserPart
+        userPartRepository.save(userPart);
+
+        // Delete the transaction
         transactionRepository.deleteById(transactionId);
     }
+
 
     @Override
     public List<SparePartTransactionDto> getByBillNo(String billNo) {
