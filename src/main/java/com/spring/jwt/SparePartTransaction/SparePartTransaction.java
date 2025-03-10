@@ -65,8 +65,4 @@ public class SparePartTransaction {
     @Column(name = "customerName")
     private String customerName;
 
-
-//    @ManyToOne
-//    @JoinColumn(name = "sparePart_id", nullable = false)
-//    private SparePart sparePart;
 }

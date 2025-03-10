@@ -20,5 +20,6 @@ public interface VehicleRegRepository extends JpaRepository<VehicleReg, Integer>
 
     Optional<Object> findByAppointmentId(Integer appointmentId);
 
-    Optional<Object> findUserIdByVehicleRegId(Integer vehicleRegId);
+    Optional<VehicleReg> findUserIdByVehicleRegId(Integer vehicleRegId);
+
 }

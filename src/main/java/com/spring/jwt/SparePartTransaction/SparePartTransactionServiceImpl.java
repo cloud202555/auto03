@@ -43,17 +43,16 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (userId == null && transactionDto.getVehicleRegId() != null) {
-                VehicleReg vehicleReg = (VehicleReg) vehicleRegRepository
+                VehicleReg vehicleReg = vehicleRegRepository
                         .findUserIdByVehicleRegId(transactionDto.getVehicleRegId())
                         .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + transactionDto.getVehicleRegId()));
-                System.err.println("Retrieved VehicleReg ID: " + vehicleReg.getVehicleRegId());
                 userId = vehicleReg.getUserId();
             }
-
             if (userId == null) {
                 throw new IllegalArgumentException("Either userId or vehicleRegId must be provided for DEBIT transactions.");
             }
         }
+
 
         SparePart sparePart = (SparePart) sparePartRepository.findByPartNumber(transactionDto.getPartNumber())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
@@ -177,20 +176,25 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
     @Override
     public List<SparePartTransactionDto> getByVehicleRegId(Integer vehicleRegId) throws RuntimeException {
-
         if (vehicleRegId == null) {
             throw new IllegalArgumentException("Vehicle Registration ID cannot be null.");
         }
-        Integer userId = (Integer) vehicleRegRepository.findUserIdByVehicleRegId(vehicleRegId)
+
+        VehicleReg vehicleReg = vehicleRegRepository
+                .findById(vehicleRegId)
                 .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + vehicleRegId));
+        Integer userId = vehicleReg.getUserId();
+
         List<SparePartTransaction> transactions = transactionRepository.findByUserId(userId);
+
         if (transactions.isEmpty()) {
             throw new RuntimeException("No transactions found for Vehicle Registration ID: " + vehicleRegId);
         }
 
-        return transactions.stream().map(this::toDto).collect(Collectors.toList());
+        return transactions.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
-
 
     @Override
     public List<SparePartTransactionDto> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate) {
@@ -214,7 +218,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
     @Override
     public List<SparePartTransactionDto> getByPartNumberAndTransactionsBetweenDates(Integer sparePartId, LocalDateTime startDate, LocalDateTime endDate) {
-        // Validate input parameters
+
         if (sparePartId == null) {
             throw new IllegalArgumentException("Spare Part ID cannot be null.");
         }
@@ -225,29 +229,22 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             throw new IllegalArgumentException("End date cannot be before start date.");
         }
 
-        // Check if the spare part exists
         SparePart sparePart = sparePartRepository.findById(sparePartId)
                 .orElseThrow(() -> new RuntimeException("Spare part not found with ID: " + sparePartId));
 
-        // Fetch transactions within the date range for the given spare part ID
         List<SparePartTransaction> transactions = transactionRepository.findBySparePartIdAndTransactionDateBetween(
                 sparePartId, startDate, endDate);
 
-        // Handle the case when no transactions are found
         if (transactions.isEmpty()) {
             throw new RuntimeException("No transactions found for Spare Part ID: " + sparePartId +
                     " between " + startDate + " and " + endDate);
         }
 
-        // Convert to DTO and return
         return transactions.stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
-
-
-    // Entity to DTO conversion
     private SparePartTransactionDto toDto(SparePartTransaction transaction) {
         return SparePartTransactionDto.builder()
                 .sparePartTransactionId(transaction.getSparePartTransactionId())
