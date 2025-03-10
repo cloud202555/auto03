@@ -270,6 +270,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .sparePartId(transaction.getSparePartId())
                 .partName(transaction.getPartName())
                 .manufacturer(transaction.getManufacturer())
+                .vehicleRegId(transaction.getVehicleRegId())
                 .price(transaction.getPrice())
                 .qtyPrice(transaction.getQtyPrice())
                 .updateAt(transaction.getUpdateAt())
