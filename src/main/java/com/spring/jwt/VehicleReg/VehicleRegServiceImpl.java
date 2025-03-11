@@ -69,8 +69,6 @@ public class VehicleRegServiceImpl implements VehicleRegService {
                 .collect(Collectors.toList());
     }
 
-
-
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     @Override
@@ -116,7 +114,11 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         vehicleReg.setCustomerMobileNumber(vehicleRegDto.getCustomerMobileNumber());
         vehicleReg.setCustomerAadharNo(vehicleRegDto.getCustomerAadharNo());
         vehicleReg.setCustomerGstin(vehicleRegDto.getCustomerGstin());
-
+        vehicleReg.setJobCard(vehicleRegDto.getJobCard());
+        vehicleReg.setVehicleInspection(vehicleRegDto.getVehicleInspection());
+        vehicleReg.setInsuranceStatus(vehicleRegDto.getInsuranceStatus());
+        vehicleReg.setInsuredFrom(vehicleRegDto.getInsuredFrom());
+        vehicleReg.setInsuredTo(vehicleRegDto.getInsuredTo());
         vehicleReg.setSuperwiser(vehicleRegDto.getSuperwiser());
         vehicleReg.setTechnician(vehicleRegDto.getTechnician());
         vehicleReg.setWorker(vehicleRegDto.getWorker());

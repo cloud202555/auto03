@@ -1,6 +1,7 @@
 package com.spring.jwt.VehicleReg;
 
 import com.spring.jwt.entity.VehicleReg;
+import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -32,10 +33,20 @@ public class VehicleRegDto {
     private Integer userId;
     private LocalDate date;
 
+    private String vehicleInspection;
+    private String jobCard;
+    private String insuranceStatus;
+    private LocalDate insuredFrom;
+    private LocalDate insuredTo;
     public VehicleRegDto() {
     }
 
     public VehicleRegDto(VehicleReg vehicleReg) {
+        this.insuredTo = vehicleReg.getInsuredTo();
+        this.insuredFrom = vehicleReg.getInsuredFrom();
+        this.insuranceStatus = vehicleReg.getInsuranceStatus();
+        this.jobCard = vehicleReg.getJobCard();
+        this.vehicleInspection = vehicleReg.getVehicleInspection();
         this.vehicleRegId = vehicleReg.getVehicleRegId();
         this.appointmentId = vehicleReg.getAppointmentId();
         this.vehicleNumber = vehicleReg.getVehicleNumber();

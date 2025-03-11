@@ -48,7 +48,7 @@ public class SparePartController {
             @RequestParam("description") String description,
             @RequestParam("manufacturer") String manufacturer,
             @RequestParam("price") Long price,
-            @RequestParam("partNumber") Long partNumber,
+            @RequestParam("partNumber") String partNumber,
             @RequestParam("photos") List<MultipartFile> photos) {
 
         BaseResponseDTO response = sparePartService.addPart(partName, description, manufacturer, price, partNumber, photos);
@@ -62,7 +62,7 @@ public class SparePartController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String manufacturer,
             @RequestParam(required = false) Long price,
-            @RequestParam(required = false) Long partNumber,
+            @RequestParam(required = false) String partNumber,
             @RequestParam(required = false) List<MultipartFile> photos) {
 
         SparePartDto updatedPart = sparePartService.updatePart(id, partName, description, manufacturer, price, partNumber, photos);

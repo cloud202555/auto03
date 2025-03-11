@@ -19,7 +19,7 @@ public class UserPartDto {
     private String manufacturer;
     private Long price;
     private LocalDate updateAt;
-    private Long partNumber;
+    private String partNumber;
 
     public UserPartDto(UserPart userPart) {
         this.userPartId = userPart.getUserPartId();

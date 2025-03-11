@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface SparePartService {
-    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, Long partNumber, List<MultipartFile> photos);
+    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos);
 
 //    byte[] getPhotoById(Integer id);
 
@@ -14,7 +14,7 @@ public interface SparePartService {
 
     List<SparePartDto> getAllSpareParts();
 
-    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, Long partNumber, List<MultipartFile> photos);
+    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos);
 
     public BaseResponseDTO deleteSparePartById(Integer id, Integer photoIndex);
 

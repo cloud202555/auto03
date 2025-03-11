@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class SparePartTransactionDto {
 
     private Integer sparePartTransactionId;
-    private Long partNumber;
+    private String partNumber;
     private Integer sparePartId;
     private String partName;
     private String manufacturer;

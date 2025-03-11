@@ -45,7 +45,7 @@ public class SparePart {
     private List<byte[]> photo;
 
     @Column(name = "part_number", nullable = false)
-    private Long partNumber;
+    private String partNumber;
 
 
 }
