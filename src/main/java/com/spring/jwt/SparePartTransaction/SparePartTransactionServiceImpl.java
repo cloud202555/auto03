@@ -82,6 +82,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
         userPartRepository.save(userPart);
 
         SparePartTransaction transaction = SparePartTransaction.builder()
+
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
                 .partName(sparePart.getPartName())
@@ -95,6 +96,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .transactionDate(LocalDateTime.now())
                 .userId(userId)
                 .billNo(transactionDto.getBillNo())
+
                 .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null) // Ensure null for CREDIT
                 .build();
 

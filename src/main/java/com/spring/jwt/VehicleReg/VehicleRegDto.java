@@ -3,6 +3,8 @@ package com.spring.jwt.VehicleReg;
 import com.spring.jwt.entity.VehicleReg;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class VehicleRegDto {
     private Integer vehicleRegId;
@@ -28,7 +30,7 @@ public class VehicleRegDto {
     private String worker;
     private String status;
     private Integer userId;
-    private String date;
+    private LocalDate date;
 
     public VehicleRegDto() {
     }

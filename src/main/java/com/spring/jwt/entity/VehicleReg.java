@@ -9,6 +9,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Entity
 @Data
 public class VehicleReg {
@@ -69,7 +71,6 @@ public class VehicleReg {
     @Column(length = 45)
     private String customerGstin;
 
-    // Other existing fields
     @Column(length = 45)
     private String superwiser;
 
@@ -86,7 +87,7 @@ public class VehicleReg {
     private Integer userId;
 
     @Column
-    private String date;
+    private LocalDate date;
 
     public VehicleReg() {
     }
