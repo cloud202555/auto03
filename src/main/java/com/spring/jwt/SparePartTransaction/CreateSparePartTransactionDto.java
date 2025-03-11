@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CreateSparePartTransactionDto {
-    private Long partNumber;
+    private String partNumber;
     private TransactionType transactionType;
     private Integer quantity;
     private Integer userId;

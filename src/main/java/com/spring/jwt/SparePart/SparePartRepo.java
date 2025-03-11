@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface SparePartRepo extends JpaRepository<SparePart, Integer>, JpaSpecificationExecutor<SparePart> {
-    Optional<Object> findByPartNumber(Long partNumber);
+    Optional<Object> findByPartNumber(String partNumber);
 
     @Query("SELECT s FROM SparePart s " +
             "WHERE LOWER(s.partName) LIKE CONCAT('%', LOWER(:keyword), '%') " +
