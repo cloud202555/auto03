@@ -87,12 +87,35 @@ public class VehicleReg {
     private Integer userId;
 
     @Column
+    private String vehicleInspection;
+
+    @Column
+    private String jobCard;
+
+    @Column
+    private String insuranceStatus;
+
+    @Column
+    private LocalDate insuredFrom;
+
+    @Column
+    private LocalDate insuredTo;
+
+    @Column
     private LocalDate date;
 
     public VehicleReg() {
     }
 
+
     public VehicleReg(VehicleRegDto vehicleRegDto) {
+
+
+        this.insuredTo = vehicleRegDto.getInsuredTo();
+        this.insuredFrom = vehicleRegDto.getInsuredFrom();
+        this.insuranceStatus = vehicleRegDto.getInsuranceStatus();
+        this.jobCard = vehicleRegDto.getJobCard();
+        this.vehicleInspection = vehicleRegDto.getVehicleInspection();
         this.vehicleRegId = vehicleRegDto.getVehicleRegId();
         this.appointmentId = vehicleRegDto.getAppointmentId();
         this.vehicleNumber = vehicleRegDto.getVehicleNumber();

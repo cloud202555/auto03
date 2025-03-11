@@ -33,6 +33,6 @@ public class SparePartDto {
     private List<String> photo;
 
     @NotNull(message = "Part number is required.")
-    private Long partNumber;
+    private String partNumber;
 
 }

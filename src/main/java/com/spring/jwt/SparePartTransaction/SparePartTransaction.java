@@ -21,7 +21,7 @@ public class SparePartTransaction {
     private Integer sparePartTransactionId;
 
     @Column(name = "part_number", nullable = false)
-    private Long partNumber;
+    private String partNumber;
 
     @Column(name = "sparePart_id")
     private Integer sparePartId;

@@ -45,7 +45,7 @@ public class UserPart {
     private List<byte[]> photo;
 
     @Column(name = "part_number", nullable = false)
-    private Long partNumber;
+    private String partNumber;
 
     @ManyToOne
     @JoinColumn(name = "sparePartId", referencedColumnName = "sparePartId")
