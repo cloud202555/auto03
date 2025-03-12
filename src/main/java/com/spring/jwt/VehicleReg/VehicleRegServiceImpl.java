@@ -99,6 +99,7 @@ public class VehicleRegServiceImpl implements VehicleRegService {
     private void copyDtoToEntity(VehicleRegDto vehicleRegDto, VehicleReg vehicleReg) {
         vehicleReg.setVehicleRegId(vehicleRegDto.getVehicleRegId());
         vehicleReg.setAppointmentId(vehicleRegDto.getAppointmentId());
+        vehicleReg.setKmsDriven(vehicleRegDto.getKmsDriven());
 
         vehicleReg.setVehicleNumber(vehicleRegDto.getVehicleNumber());
         vehicleReg.setVehicleBrand(vehicleRegDto.getVehicleBrand());

@@ -54,7 +54,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
         }
 
 
-        SparePart sparePart = (SparePart) sparePartRepository.findByPartNumber(transactionDto.getPartNumber())
+        SparePart sparePart = (SparePart) sparePartRepository.findByPartNumberAndManufacturer(transactionDto.getPartNumber(), transactionDto.getManufacturer())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
 
         UserPart userPart = userPartRepository.findBySparePart_SparePartId(sparePart.getSparePartId())
@@ -93,18 +93,17 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .updateAt(sparePart.getUpdateAt())
                 .transactionType(transactionDto.getTransactionType())
                 .quantity(transactionDto.getQuantity())
+                .vehicleRegId(transactionDto.getVehicleRegId())
                 .transactionDate(LocalDateTime.now())
                 .userId(userId)
                 .billNo(transactionDto.getBillNo())
 
-                .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null) // Ensure null for CREDIT
+                .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null)
                 .build();
 
         transaction = transactionRepository.save(transaction);
         return toDto(transaction);
     }
-
-
 
     @Override
     public SparePartTransactionDto getTransactionById(Integer transactionId) {
