@@ -10,6 +10,7 @@ import lombok.*;
 public class CreateSparePartTransactionDto {
     private String partNumber;
     private TransactionType transactionType;
+    private String manufacturer;
     private Integer quantity;
     private Integer userId;
     private String billNo;

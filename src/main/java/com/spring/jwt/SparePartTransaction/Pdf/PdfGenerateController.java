@@ -19,73 +19,52 @@ public class PdfGenerateController {
     private final PdfGenerationService pdfGenerationService;
 
     /**
-     * Endpoint to generate the invoice PDF.
+     * Endpoint to generate the invoice PDF from a JSON body.
+     * The JSON should match the structure of PdfRequest, e.g.:
      *
-     * Required request parameters:
-     * - vehicleRegId: ID to fetch VehicleReg details.
-     * - quantity: Quantity for the spare part.
-     * - discountPercent: Discount percentage for spares.
-     * - cGst: CGST percentage.
-     * - sGst: SGST percentage.
-     * - invoiceNumber: Invoice number.
-     * - jobcardNo: Jobcard number.
-     * - jobcardDate: Jobcard date (dd-MM-yyyy).
-     * - kmsDriven: Kilometers driven.
-     *
-     * Additional labour work parameters (provided from front end):
-     * - labourParticulars: Description for the labour work.
-     * - labourQty: Quantity for labour work.
-     * - labourUnitPrice: Unit price for labour work.
-     * - labourDiscountPercent: Discount percentage for labour work.
-     *
-     * Optional parameters:
-     * - slogan: Company slogan.
-     * - comments: Additional comments.
-     *
-     * @return The generated PDF as an attachment.
+     * {
+     *   "vehicleRegId": 123,
+     *   "invoiceNumber": "INV-001",
+     *   "jobcardNo": "JC-456",
+     *   "jobcardDate": "01-12-2023",
+     *   "kmsDriven": "35000",
+     *   "slogan": "Quality Service",
+     *   "comments": "Check brake pads also",
+     *   "parts": [
+     *     {
+     *       "partName": "Clutch Set",
+     *       "quantity": 1,
+     *       "unitPrice": 2736.00,
+     *       "discountPercent": 5.0,
+     *       "cgstPercent": 9.0,
+     *       "sgstPercent": 9.0,
+     *       "igstPercent": 0.0
+     *     }
+     *   ],
+     *   "labours": [
+     *     {
+     *       "description": "Gear Box Repair",
+     *       "quantity": 1,
+     *       "unitPrice": 300.00,
+     *       "discountPercent": 0.0,
+     *       "cgstPercent": 9.0,
+     *       "sgstPercent": 9.0,
+     *       "igstPercent": 0.0
+     *     }
+     *   ]
+     * }
      */
-    @GetMapping("/generate")
-    public ResponseEntity<byte[]> generatePdf(
-            @RequestParam Integer vehicleRegId,
-            @RequestParam String quantity,
-            @RequestParam String discountPercent,
-            @RequestParam String cGst,
-            @RequestParam String sGst,
-            @RequestParam String invoiceNumber,
-            @RequestParam String jobcardNo,
-            @RequestParam String jobcardDate,
-            @RequestParam String kmsDriven,
-            @RequestParam(required = false) String slogan,
-            @RequestParam(required = false) String comments,
-            // New labour work parameters from front end:
-            @RequestParam String labourParticulars,
-            @RequestParam String labourQty,
-            @RequestParam String labourUnitPrice,
-            @RequestParam String labourDiscountPercent
-    ) {
+    @PostMapping("/generate")
+    @CrossOrigin(origins = "http://localhost:5173")
+    public ResponseEntity<byte[]> generatePdf(@RequestBody PdfRequest request) {
         try {
-            byte[] pdfData = pdfGenerationService.generatePdf(
-                    vehicleRegId,
-                    quantity,
-                    discountPercent,
-                    cGst,
-                    sGst,
-                    invoiceNumber,
-                    jobcardNo,
-                    jobcardDate,
-                    kmsDriven,
-                    slogan,
-                    comments,
-                    labourParticulars,
-                    labourQty,
-                    labourUnitPrice,
-                    labourDiscountPercent
-            );
+            byte[] pdfData = pdfGenerationService.generatePdf(request);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
             headers.setContentDispositionFormData("attachment", "invoice.pdf");
             headers.setContentLength(pdfData.length);
+
             return ResponseEntity.ok().headers(headers).body(pdfData);
         } catch (RuntimeException e) {
             byte[] errorResponse = serializeResponse(e.getMessage());

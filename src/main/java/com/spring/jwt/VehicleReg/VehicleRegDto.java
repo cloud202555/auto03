@@ -18,6 +18,7 @@ public class VehicleRegDto {
     private String engineNumber;
     private String chasisNumber;
     private String numberPlateColour;
+    private Integer kmsDriven;
 
     private Integer customerId;
     private String customerName;
@@ -42,6 +43,7 @@ public class VehicleRegDto {
     }
 
     public VehicleRegDto(VehicleReg vehicleReg) {
+        this.kmsDriven=vehicleReg.getKmsDriven();
         this.insuredTo = vehicleReg.getInsuredTo();
         this.insuredFrom = vehicleReg.getInsuredFrom();
         this.insuranceStatus = vehicleReg.getInsuranceStatus();

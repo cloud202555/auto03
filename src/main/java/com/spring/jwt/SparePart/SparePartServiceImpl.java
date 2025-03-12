@@ -36,6 +36,12 @@ public class SparePartServiceImpl implements SparePartService {
 
     @Override
     public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos) {
+        // Check if a part with the same manufacturer and part number already exists.
+        Optional<SparePart> existingPart = sparePartRepo.findByPartNumberAndManufacturer(partNumber, manufacturer);
+        if (existingPart.isPresent()) {
+            throw new BadRequestException("Part with part number " + partNumber + " already exists for manufacturer " + manufacturer);
+        }
+
         try {
             List<byte[]> compressedPhotos = photos.stream()
                     .map(file -> {

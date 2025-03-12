@@ -2,8 +2,6 @@ package com.spring.jwt.SparePartTransaction.Pdf;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import com.spring.jwt.SparePartTransaction.SparePartTransaction;
-import com.spring.jwt.SparePartTransaction.SparePartTransactionRepository;
 import com.spring.jwt.VehicleReg.VehicleRegRepository;
 import com.spring.jwt.entity.VehicleReg;
 import lombok.RequiredArgsConstructor;
@@ -13,68 +11,51 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
 public class PdfGenerationService {
 
     private final VehicleRegRepository vehicleRegRepository;
-    private final SparePartTransactionRepository sparePartRepository;
 
-    public byte[] generatePdf(Integer vehicleRegId,
-                              String quantityParam,
-                              String discountPercentParam,
-                              String cGstParam,
-                              String sGstParam,
-                              String invoiceNumber,
-                              String jobcardNo,
-                              String jobcardDate, // dd-MM-yyyy
-                              String kmsDriven,
-                              String slogan,
-                              String comments,
-                              // Labour params from front end
-                              String labourParticulars,
-                              String labourQtyParam,
-                              String labourUnitPriceParam,
-                              String labourDiscountPercentParam) throws Exception {
+    // Static counters for auto-generation (Invoice starts from 1000, Job Card from 100)
+    private static int invoiceNumberCounter = 1000;
+    private static int jobCardNumberCounter = 100;
 
-        // 1) Fetch VehicleReg
-        VehicleReg vehicle = vehicleRegRepository.findById(vehicleRegId)
-                .orElseThrow(() -> new RuntimeException("VehicleReg not found with ID: " + vehicleRegId));
+    public byte[] generatePdf(PdfRequest request) throws Exception {
 
-        // 2) Fetch SparePartTransactions
-        List<SparePartTransaction> transactions = sparePartRepository.findByVehicleRegId(vehicleRegId);
-        if (transactions == null || transactions.isEmpty()) {
-            throw new RuntimeException("No SparePartTransaction found for VehicleRegId: " + vehicleRegId);
+        // Ensure that parts and labours are not null (if missing, use empty lists)
+        if (request.getParts() == null) {
+            request.setParts(new ArrayList<>());
+        }
+        if (request.getLabours() == null) {
+            request.setLabours(new ArrayList<>());
         }
 
-        // 3) Parse numeric params
-        int defaultQuantity        = Integer.parseInt(quantityParam);
-        double defaultDiscount     = Double.parseDouble(discountPercentParam);
-        double cgstRate            = Double.parseDouble(cGstParam);
-        double sgstRate            = Double.parseDouble(sGstParam);
+        // 1) Fetch VehicleReg from DB for "CUSTOMER/VEHICLE DETAILS"
+        VehicleReg vehicle = vehicleRegRepository.findById(request.getVehicleRegId())
+                .orElseThrow(() -> new RuntimeException("VehicleReg not found with ID: " + request.getVehicleRegId()));
 
-        // Parse labour params
-        int labourQty             = Integer.parseInt(labourQtyParam);
-        double labourUnitPrice    = Double.parseDouble(labourUnitPriceParam);
-        double labourDiscount     = Double.parseDouble(labourDiscountPercentParam);
-
-        // 4) Invoice date
+        // 2) Prepare date/time info
         LocalDate invDate = (vehicle.getDate() != null) ? vehicle.getDate() : LocalDate.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String invoiceDate = invDate.format(dtf);
 
-        // 5) Prepare PDF
+        // Auto-generate Invoice and Job Card numbers
+        String generatedInvoiceNumber = String.valueOf(invoiceNumberCounter++);
+        String generatedJobCardNumber = String.valueOf(jobCardNumberCounter++);
+
+        // 3) Create PDF doc
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 20, 20, 20, 20);
         PdfWriter writer = PdfWriter.getInstance(document, baos);
         writer.setPageEvent(new BorderEvent()); // Page border
         document.open();
 
-        // ---------------------------------------------------------------------
-        // (A) TOP LINE: date/time on left, "Auto Car Care Point | Tax Invoice" on right
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------
+        // (A) TOP LINE
+        // ---------------------------------------------------
         PdfPTable topLineTable = new PdfPTable(2);
         topLineTable.setWidthPercentage(100f);
         topLineTable.setWidths(new float[]{50f, 50f});
@@ -95,16 +76,15 @@ public class PdfGenerationService {
 
         document.add(topLineTable);
 
-        // ---------------------------------------------------------------------
-        // (B) BIG BORDERED TABLE: left = company info, right = "TAX INVOICE"
-        // ---------------------------------------------------------------------
-        PdfPTable headerBox = new PdfPTable(2);
+        // ---------------------------------------------------
+        // (B) HEADER BOX: COMPANY INFO (No Slogan)
+        // ---------------------------------------------------
+        PdfPTable headerBox = new PdfPTable(1);
         headerBox.setWidthPercentage(100f);
-        headerBox.setWidths(new float[]{70f, 30f});
 
-        PdfPCell headerLeft = new PdfPCell();
-        headerLeft.setBorder(Rectangle.BOX);
-        headerLeft.setPadding(5f);
+        PdfPCell headerCell = new PdfPCell();
+        headerCell.setBorder(Rectangle.BOX);
+        headerCell.setPadding(5f);
 
         Paragraph compName = new Paragraph("AUTO CAR CARE POINT",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11));
@@ -113,96 +93,71 @@ public class PdfGenerationService {
                         "Ph : 9595054555 / 7758817766   Email : autocarcarepoint@gmail.com\n" +
                         "GSTIN : 27GLYPS9891C1ZV",
                 FontFactory.getFont(FontFactory.HELVETICA, 9));
-        Paragraph compSlogan = new Paragraph(
-                (slogan != null && !slogan.isEmpty()) ? slogan : "Quality Service",
-                FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 9));
-
-        headerLeft.addElement(compName);
-        headerLeft.addElement(compAddr);
-        headerLeft.addElement(compSlogan);
-        headerBox.addCell(headerLeft);
-
-        PdfPCell headerRight = new PdfPCell();
-        headerRight.setBorder(Rectangle.BOX);
-        headerRight.setPadding(5f);
-        headerRight.setHorizontalAlignment(Element.ALIGN_RIGHT);
-
-        Paragraph taxInvoice = new Paragraph("TAX INVOICE",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
-        headerRight.addElement(taxInvoice);
-
-        headerBox.addCell(headerRight);
+        headerCell.addElement(compName);
+        headerCell.addElement(compAddr);
+        headerBox.addCell(headerCell);
         document.add(headerBox);
 
-        // ---------------------------------------------------------------------
-        // (C) CUSTOMER & VEHICLE DETAILS - side by side boxes
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------
+        // (C) CUSTOMER & VEHICLE DETAILS
+        // ---------------------------------------------------
         PdfPTable custVehTable = new PdfPTable(2);
         custVehTable.setWidthPercentage(100);
         custVehTable.setWidths(new float[]{50f, 50f});
-        custVehTable.setSpacingBefore(10f);
+        custVehTable.setSpacingBefore(0f); // No extra space
+        custVehTable.setHeaderRows(1);
 
-        // CUSTOMER DETAILS
-        PdfPCell custBox = new PdfPCell();
-        custBox.setBorder(Rectangle.BOX);
-        custBox.setPadding(5f);
+        PdfPCell customerHeader = new PdfPCell(new Phrase("CUSTOMER DETAILS",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+        customerHeader.setHorizontalAlignment(Element.ALIGN_CENTER);
+        customerHeader.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        customerHeader.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.BOTTOM);
+        custVehTable.addCell(customerHeader);
 
-        Paragraph custTitle = new Paragraph("CUSTOMER DETAILS",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10));
-        custTitle.setAlignment(Element.ALIGN_CENTER);
-        custBox.addElement(custTitle);
+        PdfPCell vehicleHeader = new PdfPCell(new Phrase("VEHICLE DETAILS",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10)));
+        vehicleHeader.setHorizontalAlignment(Element.ALIGN_CENTER);
+        vehicleHeader.setVerticalAlignment(Element.ALIGN_MIDDLE);
+        vehicleHeader.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.BOTTOM);
+        custVehTable.addCell(vehicleHeader);
 
-        custBox.addElement(new Paragraph("Name : " + vehicle.getCustomerName(),
+        // Data row for customer and vehicle details
+        PdfPCell customerData = new PdfPCell();
+        customerData.setPadding(5f);
+        customerData.addElement(new Paragraph("Name : " + vehicle.getCustomerName(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        custBox.addElement(new Paragraph("Address : " + vehicle.getCustomerAddress(),
+        customerData.addElement(new Paragraph("Address : " + vehicle.getCustomerAddress(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        custBox.addElement(new Paragraph("Mobile : " + vehicle.getCustomerMobileNumber(),
+        customerData.addElement(new Paragraph("Mobile : " + vehicle.getCustomerMobileNumber(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        custBox.addElement(new Paragraph("Email : No",
+        customerData.addElement(new Paragraph("Email : No",
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        custBox.addElement(new Paragraph("Aadhar No : " + vehicle.getCustomerAadharNo(),
-                FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        custBox.addElement(new Paragraph("GSTIN : " + vehicle.getCustomerGstin(),
-                FontFactory.getFont(FontFactory.HELVETICA, 9)));
+        custVehTable.addCell(customerData);
 
-        custVehTable.addCell(custBox);
-
-        // VEHICLE DETAILS
-        PdfPCell vehBox = new PdfPCell();
-        vehBox.setBorder(Rectangle.BOX);
-        vehBox.setPadding(5f);
-
-        Paragraph vehTitle = new Paragraph("VEHICLE DETAILS",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10));
-        vehTitle.setAlignment(Element.ALIGN_CENTER);
-        vehBox.addElement(vehTitle);
-
-        vehBox.addElement(new Paragraph("Invoice No : " + invoiceNumber,
+        PdfPCell vehicleData = new PdfPCell();
+        vehicleData.setPadding(5f);
+        vehicleData.addElement(new Paragraph("Invoice No : " + generatedInvoiceNumber,
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("Invoice Date : " + invoiceDate,
+        vehicleData.addElement(new Paragraph("Invoice Date : " + invoiceDate,
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("Reg. No : " + vehicle.getVehicleNumber(),
+        vehicleData.addElement(new Paragraph("Reg. No : " + vehicle.getVehicleNumber(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("Model : " + vehicle.getVehicleBrand()
-                + " - " + vehicle.getVehicleModelName(),
+        vehicleData.addElement(new Paragraph("Engine No : " + vehicle.getEngineNumber(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("Jobcard No : " + jobcardNo,
+        // NEW: Add KMs Driven field here
+        vehicleData.addElement(new Paragraph("KMs Driven : " + String.valueOf(vehicle.getKmsDriven()),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("Jobcard Date : " + jobcardDate,
+        vehicleData.addElement(new Paragraph("Model : " + vehicle.getVehicleBrand() + " - " + vehicle.getVehicleModelName(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("KMS. Driven : " + kmsDriven,
+        vehicleData.addElement(new Paragraph("Jobcard No : " + generatedJobCardNumber,
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        vehBox.addElement(new Paragraph("Engine No : " + vehicle.getEngineNumber(),
-                FontFactory.getFont(FontFactory.HELVETICA, 9)));
-
-        custVehTable.addCell(vehBox);
+        custVehTable.addCell(vehicleData);
 
         document.add(custVehTable);
-        document.add(Chunk.NEWLINE);
 
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------
         // (D) SPARES TABLE
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------
         Paragraph sparesHeading = new Paragraph("SPARES",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
         sparesHeading.setSpacingAfter(2f);
@@ -212,43 +167,78 @@ public class PdfGenerationService {
         sparesTable.setWidthPercentage(100);
         sparesTable.setSpacingBefore(2f);
         sparesTable.setWidths(new float[]{
-                4f, 30f, 4f, 8f, 6f, 8f, 10f, 6f, 8f, 6f, 8f, 6f, 8f, 10f
+                4f, 30f, 4f, 8f,  // S.No, PartName, Qty, Unit Price
+                6f, 8f,          // Discount (two subcolumns)
+                10f,             // Taxable Amt
+                6f, 8f,          // CGST (two subcolumns)
+                6f, 8f,          // SGST (two subcolumns)
+                6f, 8f,          // IGST (two subcolumns)
+                10f              // Amount
         });
+        sparesTable.setHeaderRows(2);
 
-        sparesTable.addCell(headerCell("S.No"));
-        sparesTable.addCell(headerCell("Perticulars Of Parts"));
-        sparesTable.addCell(headerCell("Qty"));
-        sparesTable.addCell(headerCell("Unit Price"));
-        sparesTable.addCell(headerCell("Discount (%)"));
-        sparesTable.addCell(headerCell("Discount Amt"));
-        sparesTable.addCell(headerCell("Taxable Amt"));
-        sparesTable.addCell(headerCell("CGST %"));
-        sparesTable.addCell(headerCell("Amt"));
-        sparesTable.addCell(headerCell("SGST %"));
-        sparesTable.addCell(headerCell("Amt"));
-        sparesTable.addCell(headerCell("IGST %"));
-        sparesTable.addCell(headerCell("Amt"));
-        sparesTable.addCell(headerCell("Amount"));
+        // First row of spares table header
+        PdfPCell sNoHeader = headerCell("S.No");
+        sNoHeader.setRowspan(2);
+        sparesTable.addCell(sNoHeader);
+        PdfPCell partHeader = headerCell("Perticulars Of Parts");
+        partHeader.setRowspan(2);
+        sparesTable.addCell(partHeader);
+        PdfPCell qtyHeader = headerCell("Qty");
+        qtyHeader.setRowspan(2);
+        sparesTable.addCell(qtyHeader);
+        PdfPCell unitPriceHeader = headerCell("Unit Price");
+        unitPriceHeader.setRowspan(2);
+        sparesTable.addCell(unitPriceHeader);
+        PdfPCell discountHeader = headerCell("Discount");
+        discountHeader.setColspan(2);
+        sparesTable.addCell(discountHeader);
+        PdfPCell taxableAmtHeader = headerCell("Taxable Amt");
+        taxableAmtHeader.setRowspan(2);
+        sparesTable.addCell(taxableAmtHeader);
+        PdfPCell cgstHeader = headerCell("CGST");
+        cgstHeader.setColspan(2);
+        sparesTable.addCell(cgstHeader);
+        PdfPCell sgstHeader = headerCell("SGST");
+        sgstHeader.setColspan(2);
+        sparesTable.addCell(sgstHeader);
+        PdfPCell igstHeader = headerCell("IGST");
+        igstHeader.setColspan(2);
+        sparesTable.addCell(igstHeader);
+        PdfPCell amountHeader = headerCell("Amount");
+        amountHeader.setRowspan(2);
+        sparesTable.addCell(amountHeader);
 
-        int serial = 1;
+        // Second row of spares header (subcolumns)
+        sparesTable.addCell(headerCell("%"));
+        sparesTable.addCell(headerCell("Amt"));
+        sparesTable.addCell(headerCell("%"));
+        sparesTable.addCell(headerCell("Amt"));
+        sparesTable.addCell(headerCell("%"));
+        sparesTable.addCell(headerCell("Amt"));
+        sparesTable.addCell(headerCell("%"));
+        sparesTable.addCell(headerCell("Amt"));
+
         double sparesSubTotal = 0.0;
-        for (SparePartTransaction txn : transactions) {
-            int qty = (txn.getQuantity() != null) ? txn.getQuantity() : defaultQuantity;
-            double discPercent = defaultDiscount;
-            double price = (txn.getPrice() != null) ? txn.getPrice().doubleValue() : 0.0;
+        int sNo = 1;
+        for (PartDto part : request.getParts()) {
+            int qty = part.getQuantity();
+            double price = part.getUnitPrice();
+            double discPercent = part.getDiscountPercent();
+            double cgstRate = part.getCgstPercent();
+            double sgstRate = part.getSgstPercent();
+            double igstRate = part.getIgstPercent();
+            double totalPrice = price * qty;
+            double discountAmt = totalPrice * (discPercent / 100.0);
+            double taxableAmt = totalPrice - discountAmt;
+            double cgstAmt = taxableAmt * (cgstRate / 100.0);
+            double sgstAmt = taxableAmt * (sgstRate / 100.0);
+            double igstAmt = taxableAmt * (igstRate / 100.0);
+            double finalAmount = taxableAmt + cgstAmt + sgstAmt + igstAmt;
+            sparesSubTotal += finalAmount;
 
-            double totalPrice   = price * qty;
-            double discountAmt  = totalPrice * (discPercent / 100.0);
-            double taxableAmt   = totalPrice - discountAmt;
-            double cgstAmt      = taxableAmt * (cgstRate / 100.0);
-            double sgstAmt      = taxableAmt * (sgstRate / 100.0);
-            double igstAmt      = 0.0;
-            double finalAmount  = taxableAmt + cgstAmt + sgstAmt + igstAmt;
-
-            sparesSubTotal     += finalAmount;
-
-            sparesTable.addCell(dataCell(String.valueOf(serial++)));
-            sparesTable.addCell(dataCell(txn.getPartName()));
+            sparesTable.addCell(dataCell(String.valueOf(sNo++)));
+            sparesTable.addCell(dataCell(part.getPartName()));
             sparesTable.addCell(dataCell(String.valueOf(qty)));
             sparesTable.addCell(dataCell(String.format("%.2f", price)));
             sparesTable.addCell(dataCell(String.format("%.2f", discPercent)));
@@ -258,18 +248,15 @@ public class PdfGenerationService {
             sparesTable.addCell(dataCell(String.format("%.2f", cgstAmt)));
             sparesTable.addCell(dataCell(String.format("%.2f", sgstRate)));
             sparesTable.addCell(dataCell(String.format("%.2f", sgstAmt)));
-            sparesTable.addCell(dataCell(String.format("%.2f", 0.0))); // IGST %
+            sparesTable.addCell(dataCell(String.format("%.2f", igstRate)));
             sparesTable.addCell(dataCell(String.format("%.2f", igstAmt)));
             sparesTable.addCell(dataCell(String.format("%.2f", finalAmount)));
         }
-
-        // SUB TOTAL inside SPARES
         PdfPCell sparesSubLabel = new PdfPCell(new Phrase("SUB TOTAL",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         sparesSubLabel.setColspan(13);
         sparesSubLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
         sparesTable.addCell(sparesSubLabel);
-
         PdfPCell sparesSubValue = new PdfPCell(new Phrase(String.format("%.2f", sparesSubTotal),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         sparesSubValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -277,9 +264,9 @@ public class PdfGenerationService {
 
         document.add(sparesTable);
 
-        // ---------------------------------------------------------------------
-        // (E) LABOUR WORK TABLE
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------
+        // (E) LABOUR TABLE
+        // ---------------------------------------------------
         Paragraph labourHeading = new Paragraph("LABOUR WORK",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
         labourHeading.setSpacingAfter(2f);
@@ -289,56 +276,97 @@ public class PdfGenerationService {
         labourTable.setWidthPercentage(100);
         labourTable.setSpacingBefore(2f);
         labourTable.setWidths(new float[]{
-                4f, 30f, 4f, 8f, 6f, 8f, 10f, 6f, 8f, 6f, 8f, 6f, 8f, 10f
+                4f, 30f, 4f, 8f,  // S.No, description, Qty, Unit Price
+                6f, 8f,          // Discount (two subcolumns)
+                10f,             // Taxable Amt
+                6f, 8f,          // CGST (two subcolumns)
+                6f, 8f,          // SGST (two subcolumns)
+                6f, 8f,          // IGST (two subcolumns)
+                10f              // Amount
         });
+        labourTable.setHeaderRows(2);
 
-        labourTable.addCell(headerCell("S.No"));
-        labourTable.addCell(headerCell("Perticulars Of Services"));
-        labourTable.addCell(headerCell("Qty"));
-        labourTable.addCell(headerCell("Unit Price"));
-        labourTable.addCell(headerCell("Discount (%)"));
-        labourTable.addCell(headerCell("Discount Amt"));
-        labourTable.addCell(headerCell("Taxable Amt"));
-        labourTable.addCell(headerCell("CGST %"));
+        PdfPCell lSNoHeader = headerCell("S.No");
+        lSNoHeader.setRowspan(2);
+        labourTable.addCell(lSNoHeader);
+        PdfPCell lDescHeader = headerCell("Perticulars Of Services");
+        lDescHeader.setRowspan(2);
+        labourTable.addCell(lDescHeader);
+        PdfPCell lQtyHeader = headerCell("Qty");
+        lQtyHeader.setRowspan(2);
+        labourTable.addCell(lQtyHeader);
+        PdfPCell lUnitPriceHeader = headerCell("Unit Price");
+        lUnitPriceHeader.setRowspan(2);
+        labourTable.addCell(lUnitPriceHeader);
+        PdfPCell lDiscountHeader = headerCell("Discount");
+        lDiscountHeader.setColspan(2);
+        labourTable.addCell(lDiscountHeader);
+        PdfPCell lTaxableAmtHeader = headerCell("Taxable Amt");
+        lTaxableAmtHeader.setRowspan(2);
+        labourTable.addCell(lTaxableAmtHeader);
+        PdfPCell lCgstHeader = headerCell("CGST");
+        lCgstHeader.setColspan(2);
+        labourTable.addCell(lCgstHeader);
+        PdfPCell lSgstHeader = headerCell("SGST");
+        lSgstHeader.setColspan(2);
+        labourTable.addCell(lSgstHeader);
+        PdfPCell lIgstHeader = headerCell("IGST");
+        lIgstHeader.setColspan(2);
+        labourTable.addCell(lIgstHeader);
+        PdfPCell lAmountHeader = headerCell("Amount");
+        lAmountHeader.setRowspan(2);
+        labourTable.addCell(lAmountHeader);
+
+        // Second row of labour header (subcolumns)
+        labourTable.addCell(headerCell("%"));
         labourTable.addCell(headerCell("Amt"));
-        labourTable.addCell(headerCell("SGST %"));
+        labourTable.addCell(headerCell("%"));
         labourTable.addCell(headerCell("Amt"));
-        labourTable.addCell(headerCell("IGST %"));
+        labourTable.addCell(headerCell("%"));
         labourTable.addCell(headerCell("Amt"));
-        labourTable.addCell(headerCell("Amount"));
+        labourTable.addCell(headerCell("%"));
+        labourTable.addCell(headerCell("Amt"));
 
-        double labourTotalPrice = labourUnitPrice * labourQty;
-        double labourDiscountAmt = labourTotalPrice * (labourDiscount / 100.0);
-        double labourTaxableAmt  = labourTotalPrice - labourDiscountAmt;
-        double labourCgstAmt     = labourTaxableAmt * (cgstRate / 100.0);
-        double labourSgstAmt     = labourTaxableAmt * (sgstRate / 100.0);
-        double labourIgstAmt     = 0.0;
-        double labourFinalAmt    = labourTaxableAmt + labourCgstAmt + labourSgstAmt + labourIgstAmt;
+        double labourSubTotal = 0.0;
+        sNo = 1;
+        for (LabourDto labour : request.getLabours()) {
+            int qty = labour.getQuantity();
+            double price = labour.getUnitPrice();
+            double discPercent = labour.getDiscountPercent();
+            double cgstRate = labour.getCgstPercent();
+            double sgstRate = labour.getSgstPercent();
+            double igstRate = labour.getIgstPercent();
+            double totalPrice = price * qty;
+            double discountAmt = totalPrice * (discPercent / 100.0);
+            double taxableAmt = totalPrice - discountAmt;
+            double cgstAmt = taxableAmt * (cgstRate / 100.0);
+            double sgstAmt = taxableAmt * (sgstRate / 100.0);
+            double igstAmt = taxableAmt * (igstRate / 100.0);
+            double finalAmount = taxableAmt + cgstAmt + sgstAmt + igstAmt;
+            labourSubTotal += finalAmount;
 
-        labourTable.addCell(dataCell("1"));
-        labourTable.addCell(dataCell(labourParticulars));
-        labourTable.addCell(dataCell(String.valueOf(labourQty)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourUnitPrice)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourDiscount)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourDiscountAmt)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourTaxableAmt)));
-        labourTable.addCell(dataCell(String.format("%.2f", cgstRate)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourCgstAmt)));
-        labourTable.addCell(dataCell(String.format("%.2f", sgstRate)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourSgstAmt)));
-        labourTable.addCell(dataCell(String.format("%.2f", 0.0))); // IGST %
-        labourTable.addCell(dataCell(String.format("%.2f", labourIgstAmt)));
-        labourTable.addCell(dataCell(String.format("%.2f", labourFinalAmt)));
-
-        // SUB TOTAL inside LABOUR
+            labourTable.addCell(dataCell(String.valueOf(sNo++)));
+            labourTable.addCell(dataCell(labour.getDescription()));
+            labourTable.addCell(dataCell(String.valueOf(qty)));
+            labourTable.addCell(dataCell(String.format("%.2f", price)));
+            labourTable.addCell(dataCell(String.format("%.2f", discPercent)));
+            labourTable.addCell(dataCell(String.format("%.2f", discountAmt)));
+            labourTable.addCell(dataCell(String.format("%.2f", taxableAmt)));
+            labourTable.addCell(dataCell(String.format("%.2f", cgstRate)));
+            labourTable.addCell(dataCell(String.format("%.2f", cgstAmt)));
+            labourTable.addCell(dataCell(String.format("%.2f", sgstRate)));
+            labourTable.addCell(dataCell(String.format("%.2f", sgstAmt)));
+            labourTable.addCell(dataCell(String.format("%.2f", igstRate)));
+            labourTable.addCell(dataCell(String.format("%.2f", igstAmt)));
+            labourTable.addCell(dataCell(String.format("%.2f", finalAmount)));
+        }
         PdfPCell labourSubLabel = new PdfPCell(new Phrase("SUB TOTAL",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         labourSubLabel.setColspan(13);
         labourSubLabel.setHorizontalAlignment(Element.ALIGN_RIGHT);
         labourSubLabel.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.TOP);
         labourTable.addCell(labourSubLabel);
-
-        PdfPCell labourSubValue = new PdfPCell(new Phrase(String.format("%.2f", labourFinalAmt),
+        PdfPCell labourSubValue = new PdfPCell(new Phrase(String.format("%.2f", labourSubTotal),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         labourSubValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
         labourSubValue.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.TOP);
@@ -346,10 +374,12 @@ public class PdfGenerationService {
 
         document.add(labourTable);
 
-        // ---------------------------------------------------------------------
-        // (F) FINAL SUMMARY (14 columns) - one horizontal line between TOTAL and ADVANCE
-        // ---------------------------------------------------------------------
-        double grandTotal = sparesSubTotal + labourFinalAmt;
+        // ---------------------------------------------------
+        // (F) FINAL SUMMARY
+        // ---------------------------------------------------
+        double grandTotal = sparesSubTotal + labourSubTotal;
+        double advAmount = request.getAdvanceAmount(); // Advance amount from request
+        double netAmount = grandTotal; // Default: net = grandTotal
 
         PdfPTable finalSummary = new PdfPTable(14);
         finalSummary.setWidthPercentage(100f);
@@ -358,15 +388,13 @@ public class PdfGenerationService {
                 4f, 30f, 4f, 8f, 6f, 8f, 10f, 6f, 8f, 6f, 8f, 6f, 8f, 10f
         });
 
-        // 1) TOTAL AMOUNT row
+        // Row: TOTAL AMOUNT
         PdfPCell totalLabelCell = new PdfPCell(new Phrase("TOTAL AMOUNT",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         totalLabelCell.setColspan(13);
         totalLabelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        // continuing line from labour sub total
         totalLabelCell.setBorder(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT);
         finalSummary.addCell(totalLabelCell);
-
         PdfPCell totalValueCell = new PdfPCell(new Phrase(String.format("%.2f", grandTotal),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         totalValueCell.setColspan(1);
@@ -374,171 +402,164 @@ public class PdfGenerationService {
         totalValueCell.setBorder(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT);
         finalSummary.addCell(totalValueCell);
 
-        // 2) ADVANCE AMOUNT row: top border => single horizontal line between total & adv
+        // Row: ADVANCE AMOUNT
         PdfPCell advLabelCell = new PdfPCell(new Phrase("ADVANCE AMOUNT",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         advLabelCell.setColspan(13);
         advLabelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        // top => single line
         advLabelCell.setBorder(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT);
         finalSummary.addCell(advLabelCell);
-
-        PdfPCell advValueCell = new PdfPCell(new Phrase(String.format("%.2f", 0.0),
+        PdfPCell advValueCell = new PdfPCell(new Phrase(String.format("%.2f", advAmount),
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         advValueCell.setColspan(1);
         advValueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         advValueCell.setBorder(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT);
         finalSummary.addCell(advValueCell);
 
+        // Row: BALANCE DUE (only if advance > 0)
+        if (advAmount > 0) {
+            netAmount = grandTotal - advAmount;
+            PdfPCell netLabelCell = new PdfPCell(new Phrase("BALANCE DUE",
+                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
+            netLabelCell.setColspan(13);
+            netLabelCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            netLabelCell.setBorder(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT);
+            finalSummary.addCell(netLabelCell);
+            PdfPCell netValueCell = new PdfPCell(new Phrase(String.format("%.2f", netAmount),
+                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
+            netValueCell.setColspan(1);
+            netValueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            netValueCell.setBorder(Rectangle.TOP | Rectangle.LEFT | Rectangle.RIGHT);
+            finalSummary.addCell(netValueCell);
+        }
+
         document.add(finalSummary);
 
-        // Single, full-width line for the “Amount in Words,” with a box border
+        // ---------------------------------------------------
+        // (G) TOTAL AMOUNT IN WORDS (WITH LINES + BOLD) - Using netAmount
+        // ---------------------------------------------------
+        if (netAmount < 0) {
+            throw new IllegalArgumentException("Advance amount cannot exceed total amount.");
+        }
         PdfPTable wordsTable = new PdfPTable(1);
         wordsTable.setWidthPercentage(100f);
-        wordsTable.setSpacingBefore(3f);
-
+        wordsTable.setSpacingBefore(0f);
         String wordsText = "Total Amount of Invoice in Words: Rs. "
-                + convertNumberToWords((long) grandTotal) + " only";
-        PdfPCell wordsCell = new PdfPCell(new Phrase(wordsText,
-                FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        wordsCell.setBorder(Rectangle.BOX);
+                + convertNumberToWords((long) netAmount) + " only";
+        Paragraph wordsPara = new Paragraph(wordsText,
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9));
+        PdfPCell wordsCell = new PdfPCell(wordsPara);
+        wordsCell.setBorder(Rectangle.TOP | Rectangle.BOTTOM);
+        wordsCell.setBorderWidthTop(1f);
+        wordsCell.setBorderWidthBottom(1f);
         wordsCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         wordsCell.setPadding(5f);
         wordsTable.addCell(wordsCell);
-
         document.add(wordsTable);
-        document.add(Chunk.NEWLINE);
 
-        // ---------------------------------------------------------------------
-        // (H) BOTTOM SECTION:
-        // ---------------------------------------------------------------------
-        // 1) Single big cell for "Customer Note" & "Note"
+        // ---------------------------------------------------
+        // (H) COMMENTS / NOTES
+        // ---------------------------------------------------
         PdfPTable noteTable = new PdfPTable(1);
         noteTable.setWidthPercentage(100f);
-        noteTable.setSpacingBefore(5f);
-
+        noteTable.setSpacingBefore(0f);
         PdfPCell noteCell = new PdfPCell();
-        noteCell.setBorder(Rectangle.BOX);
+        noteCell.setBorder(Rectangle.NO_BORDER);
         noteCell.setPadding(5f);
-
         Paragraph noteParagraph = new Paragraph();
         noteParagraph.add(new Phrase("Customer Note:\n",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
-        noteParagraph.add(new Phrase("\n", FontFactory.getFont(FontFactory.HELVETICA, 8))); // blank line
+        noteParagraph.add(new Phrase("\n", FontFactory.getFont(FontFactory.HELVETICA, 8)));
         noteParagraph.add(new Phrase("Note:\n",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
-
-        if (comments != null && !comments.isEmpty()) {
-            noteParagraph.add(new Phrase("\n" + comments,
+        if (request.getComments() != null && !request.getComments().isEmpty()) {
+            noteParagraph.add(new Phrase("\n" + request.getComments(),
                     FontFactory.getFont(FontFactory.HELVETICA, 8)));
         }
-
         noteCell.addElement(noteParagraph);
         noteTable.addCell(noteCell);
         document.add(noteTable);
 
-        // 2) Three-column row: left=QR code, middle=Customer Signature, right=Auto Car + Authorized
+        // ---------------------------------------------------
+        // (I) SIGNATURE / QR SECTION
+        // ---------------------------------------------------
         PdfPTable signTable = new PdfPTable(3);
         signTable.setWidthPercentage(100f);
         signTable.setSpacingBefore(5f);
-        // Adjust these widths to increase/decrease the column sizes
         signTable.setWidths(new float[]{30f, 35f, 35f});
-        // Increase row height
         signTable.getDefaultCell().setFixedHeight(100f);
-
-        // LEFT column: QR code + "Scan To Pay"
         PdfPCell qrCell = new PdfPCell();
         qrCell.setBorder(Rectangle.BOX);
         qrCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        qrCell.setVerticalAlignment(Element.ALIGN_TOP); // place content at top
-        qrCell.setFixedHeight(100f); // Increase to desired size
-
-        // If you have an actual QR image, you can add it here
-        // For now, just a placeholder
+        qrCell.setVerticalAlignment(Element.ALIGN_TOP);
+        qrCell.setFixedHeight(100f);
         Paragraph qrPlaceholder = new Paragraph("[QR CODE HERE]",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9));
         qrPlaceholder.setAlignment(Element.ALIGN_CENTER);
         qrCell.addElement(qrPlaceholder);
-
         Paragraph scanPayPara = new Paragraph("Scan To Pay",
                 FontFactory.getFont(FontFactory.HELVETICA, 8));
         scanPayPara.setAlignment(Element.ALIGN_CENTER);
         qrCell.addElement(scanPayPara);
-
         signTable.addCell(qrCell);
-
-        // MIDDLE column: "Customer Signature / Thumb" at vertical center or top/bottom as needed
         PdfPCell custSignCell = new PdfPCell();
         custSignCell.setBorder(Rectangle.BOX);
         custSignCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        custSignCell.setVerticalAlignment(Element.ALIGN_MIDDLE); // center
+        custSignCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
         custSignCell.setFixedHeight(100f);
-
         Paragraph custSignPara = new Paragraph("Customer Signature / Thumb",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9));
         custSignPara.setAlignment(Element.ALIGN_CENTER);
         custSignCell.addElement(custSignPara);
-
         signTable.addCell(custSignCell);
-
-        // RIGHT column: "Auto Car Care Point" at top, "Authorized Signature" at bottom
         PdfPCell rightSignCell = new PdfPCell();
         rightSignCell.setBorder(Rectangle.BOX);
         rightSignCell.setHorizontalAlignment(Element.ALIGN_CENTER);
-        rightSignCell.setVerticalAlignment(Element.ALIGN_TOP); // we'll do nested approach
+        rightSignCell.setVerticalAlignment(Element.ALIGN_TOP);
         rightSignCell.setFixedHeight(100f);
-
-        // We use a nested table with 2 rows: top row = "Auto Car Care Point", bottom row = "Authorized Signature"
         PdfPTable nestedRight = new PdfPTable(1);
         nestedRight.setWidthPercentage(100f);
         nestedRight.setTotalWidth(rightSignCell.getWidth());
-        // The top row
         PdfPCell topR = new PdfPCell(new Phrase("Auto Car Care Point",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         topR.setHorizontalAlignment(Element.ALIGN_CENTER);
         topR.setVerticalAlignment(Element.ALIGN_TOP);
         topR.setBorder(Rectangle.NO_BORDER);
-        topR.setFixedHeight(50f); // Adjust to push content to top
+        topR.setFixedHeight(50f);
         nestedRight.addCell(topR);
-
-        // The bottom row
         PdfPCell bottomR = new PdfPCell(new Phrase("Authorized Signature",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         bottomR.setHorizontalAlignment(Element.ALIGN_CENTER);
         bottomR.setVerticalAlignment(Element.ALIGN_BOTTOM);
         bottomR.setBorder(Rectangle.NO_BORDER);
-        bottomR.setFixedHeight(50f); // Adjust to push content to bottom
+        bottomR.setFixedHeight(50f);
         nestedRight.addCell(bottomR);
-
         rightSignCell.addElement(nestedRight);
         signTable.addCell(rightSignCell);
-
         document.add(signTable);
 
-        // 3) Final line: "Thank You For Visit.."
         Paragraph thanksLine = new Paragraph(
-                "Thank You For Visit.. This is a Computer Generated Invoice | Software Developed by Regex Technologies.",
+                "Thank You For Visit.. This is a Computer Generated Invoice.",
                 FontFactory.getFont(FontFactory.HELVETICA, 9));
         thanksLine.setAlignment(Element.ALIGN_CENTER);
         thanksLine.setSpacingBefore(5f);
         document.add(thanksLine);
 
-        // ---------------------------------------------------------------------
-        // (I) DATE/TIME FOOTER + URL
-        // ---------------------------------------------------------------------
+        // ---------------------------------------------------
+        // (J) DATE/TIME FOOTER + URL
+        // ---------------------------------------------------
         String footerDate = new SimpleDateFormat("dd/MM/yyyy, HH:mm").format(new java.util.Date());
         Paragraph footerInfo = new Paragraph(footerDate + " Auto Car Care Point | Tax Invoice",
                 FontFactory.getFont(FontFactory.HELVETICA, 8));
         footerInfo.setAlignment(Element.ALIGN_CENTER);
         footerInfo.setSpacingBefore(10f);
         document.add(footerInfo);
-
-        Paragraph url = new Paragraph("https://autocarcarepoint.com/job?action=printInvoice&veh_reg_id=" + vehicleRegId + " 1/1",
+        Paragraph url = new Paragraph("Visit: autocarcares.com",
                 FontFactory.getFont(FontFactory.HELVETICA, 8));
         url.setAlignment(Element.ALIGN_CENTER);
         document.add(url);
 
-        // Close
+        // Close document and writer
         document.close();
         writer.close();
 
@@ -546,7 +567,7 @@ public class PdfGenerationService {
     }
 
     // -------------------------------------------------------------------------
-    // Helper Methods for Table Cells
+    // HELPER: Table header cell
     // -------------------------------------------------------------------------
     private PdfPCell headerCell(String text) {
         PdfPCell cell = new PdfPCell(new Phrase(text,
@@ -557,6 +578,9 @@ public class PdfGenerationService {
         return cell;
     }
 
+    // -------------------------------------------------------------------------
+    // HELPER: Table data cell
+    // -------------------------------------------------------------------------
     private PdfPCell dataCell(String text) {
         PdfPCell cell = new PdfPCell(new Phrase(text,
                 FontFactory.getFont(FontFactory.HELVETICA, 7)));
@@ -567,7 +591,7 @@ public class PdfGenerationService {
     }
 
     // -------------------------------------------------------------------------
-    // Page Border Event
+    // PAGE BORDER EVENT
     // -------------------------------------------------------------------------
     private class BorderEvent extends PdfPageEventHelper {
         @Override
@@ -585,7 +609,7 @@ public class PdfGenerationService {
     }
 
     // -------------------------------------------------------------------------
-    // Number to Words
+    // NUMBER TO WORDS
     // -------------------------------------------------------------------------
     private String convertNumberToWords(long number) {
         if (number == 0) return "Zero";
@@ -605,8 +629,7 @@ public class PdfGenerationService {
         if (number < 20) {
             words = numNames[(int) number];
         } else if (number < 100) {
-            words = tensNames[(int) (number / 10)]
-                    + ((number % 10 != 0) ? numNames[(int) (number % 10)] : "");
+            words = tensNames[(int) (number / 10)] + ((number % 10 != 0) ? numNames[(int) (number % 10)] : "");
         } else if (number < 1000) {
             words = numNames[(int) (number / 100)] + " Hundred" +
                     ((number % 100 != 0) ? " and " + convertNumberToWords(number % 100) : "");

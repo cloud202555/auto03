@@ -41,6 +41,9 @@ public class VehicleReg {
     @Column(length = 45)
     private String vehicleModelName;
 
+    @Column
+    private Integer kmsDriven;
+
     @Column(length = 45)
     private String vehicleVariant;
 
@@ -109,8 +112,7 @@ public class VehicleReg {
 
 
     public VehicleReg(VehicleRegDto vehicleRegDto) {
-
-
+        this.kmsDriven=vehicleRegDto.getKmsDriven();
         this.insuredTo = vehicleRegDto.getInsuredTo();
         this.insuredFrom = vehicleRegDto.getInsuredFrom();
         this.insuranceStatus = vehicleRegDto.getInsuranceStatus();

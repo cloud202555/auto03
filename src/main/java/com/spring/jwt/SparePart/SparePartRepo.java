@@ -20,4 +20,6 @@ public interface SparePartRepo extends JpaRepository<SparePart, Integer>, JpaSpe
             "OR LOWER(s.manufacturer) LIKE CONCAT('%', LOWER(:keyword), '%')")
     List<SparePart> searchSparePartsByKeyword(@Param("keyword") String keyword);
 
+    Optional<SparePart> findByPartNumberAndManufacturer(String partNumber, String manufacturer);
+
 }
