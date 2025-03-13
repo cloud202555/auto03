@@ -35,7 +35,7 @@ public class SparePartServiceImpl implements SparePartService {
     public static final Logger logger = LoggerFactory.getLogger(SparePartServiceImpl.class);
 
     @Override
-    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos) {
+    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
         // Check if a part with the same manufacturer and part number already exists.
         Optional<SparePart> existingPart = sparePartRepo.findByPartNumberAndManufacturer(partNumber, manufacturer);
         if (existingPart.isPresent()) {
@@ -61,6 +61,10 @@ public class SparePartServiceImpl implements SparePartService {
                     .partNumber(partNumber)
                     .photo(compressedPhotos)
                     .updateAt(LocalDate.now())
+                    .sGST(sGST)
+                    .cGST(cGST)
+                    .buyingPrice(buyingPrice)
+                    .totalGST(totalGST)
                     .build();
 
             sparePart = sparePartRepo.save(sparePart);
@@ -75,6 +79,10 @@ public class SparePartServiceImpl implements SparePartService {
                     .quantity(0)
                     .sparePart(sparePart)
                     .lastUpdate(LocalDate.now().toString())
+                    .sGST(sGST)
+                    .cGST(cGST)
+                    .buyingPrice(buyingPrice)
+                    .totalGST(totalGST)
                     .build();
 
             userPartRepo.save(userPart);
@@ -106,6 +114,10 @@ public class SparePartServiceImpl implements SparePartService {
                 .photo(sparePart.getPhoto().stream()
                         .map(photo -> Base64.getEncoder().encodeToString(photo))
                         .toList())
+                .buyingPrice(sparePart.getBuyingPrice())
+                .cGST(sparePart.getCGST())
+                .sGST(sparePart.getSGST())
+                .buyingPrice(sparePart.getBuyingPrice())
                 .build()
         ).orElse(null);
     }
@@ -119,7 +131,7 @@ public class SparePartServiceImpl implements SparePartService {
     }
 
     @Override
-    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos) {
+    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
         SparePart sparePart = sparePartRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Spare part not found"));
 
@@ -128,6 +140,11 @@ public class SparePartServiceImpl implements SparePartService {
         Optional.ofNullable(manufacturer).ifPresent(sparePart::setManufacturer);
         Optional.ofNullable(price).ifPresent(sparePart::setPrice);
         Optional.ofNullable(partNumber).ifPresent(sparePart::setPartNumber);
+        Optional.ofNullable(cGST).ifPresent(sparePart::setCGST);
+        Optional.ofNullable(sGST).ifPresent(sparePart::setSGST);
+        Optional.ofNullable(totalGST).ifPresent(sparePart::setTotalGST);
+        Optional.ofNullable(buyingPrice).ifPresent(sparePart::setBuyingPrice);
+
 
         if (photos != null && !photos.isEmpty()) {
             try {

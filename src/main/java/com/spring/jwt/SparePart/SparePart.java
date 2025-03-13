@@ -47,5 +47,19 @@ public class SparePart {
     @Column(name = "part_number", nullable = false)
     private String partNumber;
 
+    @Column
+    private Integer cGST;
+
+    @Column
+    private Integer sGST;
+
+    @Column
+    private Integer totalGST;
+
+    @Column
+    private Integer buyingPrice;
+
+
+
 
 }
