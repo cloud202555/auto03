@@ -15,6 +15,10 @@ public class PdfRequest {
     private Integer advanceAmount;
     private String comments;
 
+    private double subTotal;
+    private double totalAmount;
+    private String totalInWords;
+
     private List<PartDto> parts;
     private List<LabourDto> labours;
 }
