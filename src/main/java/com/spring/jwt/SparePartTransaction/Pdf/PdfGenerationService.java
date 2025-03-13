@@ -2,6 +2,7 @@ package com.spring.jwt.SparePartTransaction.Pdf;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
+import com.spring.jwt.SparePartTransaction.Pdf.PDFEntity.CounterService;
 import com.spring.jwt.VehicleReg.VehicleRegRepository;
 import com.spring.jwt.entity.VehicleReg;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +19,11 @@ import java.util.ArrayList;
 public class PdfGenerationService {
 
     private final VehicleRegRepository vehicleRegRepository;
-
-    // Static counters for auto-generation (Invoice starts from 1000, Job Card from 100)
-    private static int invoiceNumberCounter = 1000;
-    private static int jobCardNumberCounter = 100;
+    private final CounterService counterService;
 
     public byte[] generatePdf(PdfRequest request) throws Exception {
 
-        // Ensure that parts and labours are not null (if missing, use empty lists)
+        // Ensure parts and labours lists are not null
         if (request.getParts() == null) {
             request.setParts(new ArrayList<>());
         }
@@ -33,29 +31,35 @@ public class PdfGenerationService {
             request.setLabours(new ArrayList<>());
         }
 
-        // 1) Fetch VehicleReg from DB for "CUSTOMER/VEHICLE DETAILS"
+        // Retrieve vehicle details
         VehicleReg vehicle = vehicleRegRepository.findById(request.getVehicleRegId())
                 .orElseThrow(() -> new RuntimeException("VehicleReg not found with ID: " + request.getVehicleRegId()));
 
-        // 2) Prepare date/time info
         LocalDate invDate = (vehicle.getDate() != null) ? vehicle.getDate() : LocalDate.now();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         String invoiceDate = invDate.format(dtf);
+      String generatedInvoiceNumber;
+        if (request.getInvoiceNumber() == null || request.getInvoiceNumber().trim().isEmpty()) {
+            generatedInvoiceNumber = String.valueOf(counterService.getNextCounter("invoice", 1000));
+            request.setInvoiceNumber(generatedInvoiceNumber);
+        } else {
+            generatedInvoiceNumber = request.getInvoiceNumber();
+        }
 
-        // Auto-generate Invoice and Job Card numbers
-        String generatedInvoiceNumber = String.valueOf(invoiceNumberCounter++);
-        String generatedJobCardNumber = String.valueOf(jobCardNumberCounter++);
+        String generatedJobCardNumber;
+        if (request.getJobcardNo() == null || request.getJobcardNo().trim().isEmpty()) {
+            generatedJobCardNumber = String.valueOf(counterService.getNextCounter("jobCard", 100));
+            request.setJobcardNo(generatedJobCardNumber);
+        } else {
+            generatedJobCardNumber = request.getJobcardNo();
+        }
 
-        // 3) Create PDF doc
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 20, 20, 20, 20);
         PdfWriter writer = PdfWriter.getInstance(document, baos);
-        writer.setPageEvent(new BorderEvent()); // Page border
+        writer.setPageEvent(new BorderEvent());
         document.open();
 
-        // ---------------------------------------------------
-        // (A) TOP LINE
-        // ---------------------------------------------------
         PdfPTable topLineTable = new PdfPTable(2);
         topLineTable.setWidthPercentage(100f);
         topLineTable.setWidths(new float[]{50f, 50f});
@@ -73,7 +77,6 @@ public class PdfGenerationService {
         rightCell.setBorder(Rectangle.NO_BORDER);
         rightCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         topLineTable.addCell(rightCell);
-
         document.add(topLineTable);
 
         // ---------------------------------------------------
@@ -85,7 +88,6 @@ public class PdfGenerationService {
         PdfPCell headerCell = new PdfPCell();
         headerCell.setBorder(Rectangle.BOX);
         headerCell.setPadding(5f);
-
         Paragraph compName = new Paragraph("AUTO CAR CARE POINT",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11));
         Paragraph compAddr = new Paragraph(
@@ -121,7 +123,6 @@ public class PdfGenerationService {
         vehicleHeader.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.BOTTOM);
         custVehTable.addCell(vehicleHeader);
 
-        // Data row for customer and vehicle details
         PdfPCell customerData = new PdfPCell();
         customerData.setPadding(5f);
         customerData.addElement(new Paragraph("Name : " + vehicle.getCustomerName(),
@@ -129,8 +130,6 @@ public class PdfGenerationService {
         customerData.addElement(new Paragraph("Address : " + vehicle.getCustomerAddress(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
         customerData.addElement(new Paragraph("Mobile : " + vehicle.getCustomerMobileNumber(),
-                FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        customerData.addElement(new Paragraph("Email : No",
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
         custVehTable.addCell(customerData);
 
@@ -144,7 +143,6 @@ public class PdfGenerationService {
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
         vehicleData.addElement(new Paragraph("Engine No : " + vehicle.getEngineNumber(),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
-        // NEW: Add KMs Driven field here
         vehicleData.addElement(new Paragraph("KMs Driven : " + String.valueOf(vehicle.getKmsDriven()),
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
         vehicleData.addElement(new Paragraph("Model : " + vehicle.getVehicleBrand() + " - " + vehicle.getVehicleModelName(),
@@ -152,7 +150,6 @@ public class PdfGenerationService {
         vehicleData.addElement(new Paragraph("Jobcard No : " + generatedJobCardNumber,
                 FontFactory.getFont(FontFactory.HELVETICA, 9)));
         custVehTable.addCell(vehicleData);
-
         document.add(custVehTable);
 
         // ---------------------------------------------------
@@ -167,17 +164,15 @@ public class PdfGenerationService {
         sparesTable.setWidthPercentage(100);
         sparesTable.setSpacingBefore(2f);
         sparesTable.setWidths(new float[]{
-                4f, 30f, 4f, 8f,  // S.No, PartName, Qty, Unit Price
-                6f, 8f,          // Discount (two subcolumns)
-                10f,             // Taxable Amt
-                6f, 8f,          // CGST (two subcolumns)
-                6f, 8f,          // SGST (two subcolumns)
-                6f, 8f,          // IGST (two subcolumns)
-                10f              // Amount
+                4f, 30f, 4f, 8f,
+                6f, 8f,
+                10f,
+                6f, 8f,
+                6f, 8f,
+                6f, 8f,
+                10f
         });
         sparesTable.setHeaderRows(2);
-
-        // First row of spares table header
         PdfPCell sNoHeader = headerCell("S.No");
         sNoHeader.setRowspan(2);
         sparesTable.addCell(sNoHeader);
@@ -208,8 +203,6 @@ public class PdfGenerationService {
         PdfPCell amountHeader = headerCell("Amount");
         amountHeader.setRowspan(2);
         sparesTable.addCell(amountHeader);
-
-        // Second row of spares header (subcolumns)
         sparesTable.addCell(headerCell("%"));
         sparesTable.addCell(headerCell("Amt"));
         sparesTable.addCell(headerCell("%"));
@@ -218,7 +211,6 @@ public class PdfGenerationService {
         sparesTable.addCell(headerCell("Amt"));
         sparesTable.addCell(headerCell("%"));
         sparesTable.addCell(headerCell("Amt"));
-
         double sparesSubTotal = 0.0;
         int sNo = 1;
         for (PartDto part : request.getParts()) {
@@ -236,7 +228,6 @@ public class PdfGenerationService {
             double igstAmt = taxableAmt * (igstRate / 100.0);
             double finalAmount = taxableAmt + cgstAmt + sgstAmt + igstAmt;
             sparesSubTotal += finalAmount;
-
             sparesTable.addCell(dataCell(String.valueOf(sNo++)));
             sparesTable.addCell(dataCell(part.getPartName()));
             sparesTable.addCell(dataCell(String.valueOf(qty)));
@@ -261,7 +252,6 @@ public class PdfGenerationService {
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         sparesSubValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
         sparesTable.addCell(sparesSubValue);
-
         document.add(sparesTable);
 
         // ---------------------------------------------------
@@ -271,21 +261,19 @@ public class PdfGenerationService {
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12));
         labourHeading.setSpacingAfter(2f);
         document.add(labourHeading);
-
         PdfPTable labourTable = new PdfPTable(14);
         labourTable.setWidthPercentage(100);
         labourTable.setSpacingBefore(2f);
         labourTable.setWidths(new float[]{
-                4f, 30f, 4f, 8f,  // S.No, description, Qty, Unit Price
-                6f, 8f,          // Discount (two subcolumns)
-                10f,             // Taxable Amt
-                6f, 8f,          // CGST (two subcolumns)
-                6f, 8f,          // SGST (two subcolumns)
-                6f, 8f,          // IGST (two subcolumns)
-                10f              // Amount
+                4f, 30f, 4f, 8f,
+                6f, 8f,
+                10f,
+                6f, 8f,
+                6f, 8f,
+                6f, 8f,
+                10f
         });
         labourTable.setHeaderRows(2);
-
         PdfPCell lSNoHeader = headerCell("S.No");
         lSNoHeader.setRowspan(2);
         labourTable.addCell(lSNoHeader);
@@ -316,8 +304,6 @@ public class PdfGenerationService {
         PdfPCell lAmountHeader = headerCell("Amount");
         lAmountHeader.setRowspan(2);
         labourTable.addCell(lAmountHeader);
-
-        // Second row of labour header (subcolumns)
         labourTable.addCell(headerCell("%"));
         labourTable.addCell(headerCell("Amt"));
         labourTable.addCell(headerCell("%"));
@@ -344,7 +330,6 @@ public class PdfGenerationService {
             double igstAmt = taxableAmt * (igstRate / 100.0);
             double finalAmount = taxableAmt + cgstAmt + sgstAmt + igstAmt;
             labourSubTotal += finalAmount;
-
             labourTable.addCell(dataCell(String.valueOf(sNo++)));
             labourTable.addCell(dataCell(labour.getDescription()));
             labourTable.addCell(dataCell(String.valueOf(qty)));
@@ -371,7 +356,6 @@ public class PdfGenerationService {
         labourSubValue.setHorizontalAlignment(Element.ALIGN_RIGHT);
         labourSubValue.setBorder(Rectangle.LEFT | Rectangle.RIGHT | Rectangle.TOP);
         labourTable.addCell(labourSubValue);
-
         document.add(labourTable);
 
         // ---------------------------------------------------
@@ -388,7 +372,6 @@ public class PdfGenerationService {
                 4f, 30f, 4f, 8f, 6f, 8f, 10f, 6f, 8f, 6f, 8f, 6f, 8f, 10f
         });
 
-        // Row: TOTAL AMOUNT
         PdfPCell totalLabelCell = new PdfPCell(new Phrase("TOTAL AMOUNT",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9)));
         totalLabelCell.setColspan(13);
@@ -577,7 +560,6 @@ public class PdfGenerationService {
         cell.setPadding(3f);
         return cell;
     }
-
     // -------------------------------------------------------------------------
     // HELPER: Table data cell
     // -------------------------------------------------------------------------
@@ -589,7 +571,6 @@ public class PdfGenerationService {
         cell.setPadding(3f);
         return cell;
     }
-
     // -------------------------------------------------------------------------
     // PAGE BORDER EVENT
     // -------------------------------------------------------------------------
@@ -607,7 +588,6 @@ public class PdfGenerationService {
             canvas.stroke();
         }
     }
-
     // -------------------------------------------------------------------------
     // NUMBER TO WORDS
     // -------------------------------------------------------------------------
