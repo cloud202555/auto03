@@ -24,6 +24,10 @@ public class SparePartMapper {
                 .updateAt(entity.getUpdateAt())
                 .partNumber(entity.getPartNumber())
                 .photo(convertPhotosToBase64(entity.getPhoto()))
+                .sGST(entity.getSGST())
+                .cGST(entity.getCGST())
+                .totalGST(entity.getTotalGST())
+                .buyingPrice(entity.getBuyingPrice())
                 .build();
     }
 

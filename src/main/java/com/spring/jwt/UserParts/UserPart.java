@@ -52,4 +52,17 @@ public class UserPart {
     private SparePart sparePart;
 
 
+    @Column
+    private Integer cGST;
+
+    @Column
+    private Integer sGST;
+
+    @Column
+    private Integer totalGST;
+
+    @Column
+    private Integer buyingPrice;
+
+
 }
