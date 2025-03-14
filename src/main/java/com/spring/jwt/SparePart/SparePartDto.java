@@ -1,5 +1,6 @@
 package com.spring.jwt.SparePart;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -34,5 +35,14 @@ public class SparePartDto {
 
     @NotNull(message = "Part number is required.")
     private String partNumber;
+
+
+    private Integer cGST;
+
+    private Integer sGST;
+
+    private Integer totalGST;
+
+    private Integer buyingPrice;
 
 }

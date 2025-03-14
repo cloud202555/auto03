@@ -49,11 +49,18 @@ public class SparePartController {
             @RequestParam("manufacturer") String manufacturer,
             @RequestParam("price") Long price,
             @RequestParam("partNumber") String partNumber,
-            @RequestParam("photos") List<MultipartFile> photos) {
+            @RequestParam("photos") List<MultipartFile> photos,
+            @RequestParam("cGST") Integer cGST,
+            @RequestParam("buyingPrice") Integer buyingPrice,
+            @RequestParam("totalGST") Integer totalGST,
+            @RequestParam("sGST") Integer sGST) {
 
-        BaseResponseDTO response = sparePartService.addPart(partName, description, manufacturer, price, partNumber, photos);
+        BaseResponseDTO response = sparePartService.addPart(
+                partName, description, manufacturer, price, partNumber, photos,cGST,sGST,buyingPrice,totalGST);
+
         return ResponseEntity.ok(response);
     }
+
 
     @PatchMapping("/update/{id}")
     public ResponseEntity<SparePartDto> updateSparePart(
@@ -63,9 +70,15 @@ public class SparePartController {
             @RequestParam(required = false) String manufacturer,
             @RequestParam(required = false) Long price,
             @RequestParam(required = false) String partNumber,
-            @RequestParam(required = false) List<MultipartFile> photos) {
+            @RequestParam(required = false) List<MultipartFile> photos,
+            @RequestParam(required = false) Integer cGST,
+            @RequestParam(required = false) Integer buyingPrice,
+            @RequestParam(required = false) Integer totalGST,
+            @RequestParam(required = false) Integer sGST) {
 
-        SparePartDto updatedPart = sparePartService.updatePart(id, partName, description, manufacturer, price, partNumber, photos);
+        SparePartDto updatedPart = sparePartService.updatePart(
+                id, partName, description, manufacturer, price, partNumber, photos, buyingPrice, totalGST, cGST, sGST);
+
         return ResponseEntity.ok(updatedPart);
     }
 

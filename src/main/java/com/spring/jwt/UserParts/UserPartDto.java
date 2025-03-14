@@ -1,5 +1,6 @@
 package com.spring.jwt.UserParts;
 
+import jakarta.persistence.Column;
 import lombok.*;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +21,10 @@ public class UserPartDto {
     private Long price;
     private LocalDate updateAt;
     private String partNumber;
+    private Integer cGST;
+    private Integer sGST;
+    private Integer totalGST;
+    private Integer buyingPrice;
 
     public UserPartDto(UserPart userPart) {
         this.userPartId = userPart.getUserPartId();
@@ -31,6 +36,10 @@ public class UserPartDto {
         this.description = userPart.getDescription();
         this.partName = userPart.getPartName();
         this.quantity = userPart.getQuantity();
+        this.cGST=userPart.getCGST();
+        this.sGST=userPart.getSGST();
+        this.totalGST=userPart.getTotalGST();
+        this.buyingPrice=userPart.getBuyingPrice();
 
     }
 
