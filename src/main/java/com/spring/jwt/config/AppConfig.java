@@ -112,6 +112,7 @@ public class AppConfig {
                 .requestMatchers("/userParts/**").permitAll()
                 .requestMatchers("/pdf/**").permitAll()
                 .requestMatchers("/api/invoices/**").permitAll()
+                .requestMatchers("/vendor/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)

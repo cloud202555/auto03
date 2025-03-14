@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.Optional;
 public interface VehicleRegRepository extends JpaRepository<VehicleReg, Integer> {
 
     @Query("SELECT v FROM VehicleReg v WHERE v.date BETWEEN :startDate AND :endDate")
-    List<VehicleReg> findByDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    List<VehicleReg> findByDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     List<VehicleReg> findByStatus(String status);
 
