@@ -26,4 +26,5 @@ public class SparePartTransactionDto {
     private String billNo;
     private Integer vehicleRegId;
     private String customerName;
+    private String name;
 }

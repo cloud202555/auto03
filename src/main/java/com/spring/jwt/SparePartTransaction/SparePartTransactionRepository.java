@@ -17,4 +17,12 @@ public interface SparePartTransactionRepository extends JpaRepository<SparePartT
     List<SparePartTransaction> findByBillNo(String billNo);
 
     List<SparePartTransaction> findBySparePartIdAndTransactionDateBetween(Integer sparePartId, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<SparePartTransaction> findByTransactionTypeAndNameAndTransactionDateBetween(TransactionType transactionType, String name, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<SparePartTransaction> findByNameOrPartNumber(String name, String partNumber);
+
+    List<SparePartTransaction> findByName(String name);
+
+    List<SparePartTransaction> findByPartNumber(String partNumber);
 }
