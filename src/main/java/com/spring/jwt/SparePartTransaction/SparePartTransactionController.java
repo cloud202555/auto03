@@ -124,4 +124,30 @@ public class SparePartTransactionController {
         }
     }
 
+    @GetMapping("/byTransactionTypeAndNameAndDateRange")
+    public ResponseEntity<ResponseDto<List<SparePartTransactionDto>>> getByTransactionTypeAndNameAndDateRange(
+            @RequestParam TransactionType transactionType,
+            @RequestParam String name,
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
+        try {
+            List<SparePartTransactionDto> transactions = transactionService.getByTransactionTypeAndNameAndDateRange(transactionType, name, startDate, endDate);
+            return ResponseEntity.ok(ResponseDto.success("Transactions retrieved successfully", transactions));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDto.error("No transactions found for given filters", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/byNameOrPartNumber")
+    public ResponseEntity<ResponseDto<List<SparePartTransactionDto>>> getByNameOrPartNumber(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String partNumber) {
+        try {
+            List<SparePartTransactionDto> transactions = transactionService.getByNameOrPartNumber(name, partNumber);
+            return ResponseEntity.ok(ResponseDto.success("Transactions retrieved successfully", transactions));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ResponseDto.error("No transactions found for given filters", e.getMessage()));
+        }
+
+    }
 }

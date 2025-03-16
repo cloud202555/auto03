@@ -25,4 +25,9 @@ public interface SparePartTransactionService {
 
     List<SparePartTransactionDto> getByPartNumberAndTransactionsBetweenDates(Integer sparePartId, LocalDateTime startDate, LocalDateTime endDate);
 
+
+    List<SparePartTransactionDto> getByTransactionTypeAndNameAndDateRange(TransactionType transactionType, String name, LocalDateTime startDate, LocalDateTime endDate);
+
+    List<SparePartTransactionDto> getByNameOrPartNumber(String name, String partNumber);
+
 }

@@ -65,4 +65,7 @@ public class SparePartTransaction {
     @Column(name = "customerName")
     private String customerName;
 
+    @Column(name = "vendorName")
+    private String name;
+
 }

@@ -36,11 +36,6 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         Integer userId = transactionDto.getUserId();
 
-        // For CREDIT transactions, vehicleRegId must be null
-//        if (transactionDto.getTransactionType() == TransactionType.CREDIT && transactionDto.getVehicleRegId() != null) {
-//            throw new IllegalArgumentException("Vehicle Registration ID must be null for CREDIT transactions.");
-//        }
-
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (userId == null && transactionDto.getVehicleRegId() != null) {
                 VehicleReg vehicleReg = vehicleRegRepository
@@ -53,8 +48,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             }
         }
 
-
-        SparePart sparePart = (SparePart) sparePartRepository.findByPartNumberAndManufacturer(transactionDto.getPartNumber(), transactionDto.getManufacturer())
+        SparePart sparePart = sparePartRepository.findByPartNumberAndManufacturer(transactionDto.getPartNumber(), transactionDto.getManufacturer())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
 
         UserPart userPart = userPartRepository.findBySparePart_SparePartId(sparePart.getSparePartId())
@@ -81,8 +75,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         userPartRepository.save(userPart);
 
+        // **Ensure name is saved for both CREDIT and DEBIT**
         SparePartTransaction transaction = SparePartTransaction.builder()
-
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
                 .partName(sparePart.getPartName())
@@ -93,17 +87,17 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .updateAt(sparePart.getUpdateAt())
                 .transactionType(transactionDto.getTransactionType())
                 .quantity(transactionDto.getQuantity())
-                .vehicleRegId(transactionDto.getVehicleRegId())
+                .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null)
                 .transactionDate(LocalDateTime.now())
                 .userId(userId)
                 .billNo(transactionDto.getBillNo())
-
-                .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null)
+                .name(transactionDto.getName()) // **Ensure name is saved**
                 .build();
 
         transaction = transactionRepository.save(transaction);
         return toDto(transaction);
     }
+
 
     @Override
     public SparePartTransactionDto getTransactionById(Integer transactionId) {
@@ -263,6 +257,55 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<SparePartTransactionDto> getByTransactionTypeAndNameAndDateRange(TransactionType transactionType, String name, LocalDateTime startDate, LocalDateTime endDate) {
+        if (transactionType == null || name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Transaction type and name cannot be null or empty.");
+        }
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date cannot be null.");
+        }
+        if (endDate.isBefore(startDate)) {
+            throw new IllegalArgumentException("End date cannot be before start date.");
+        }
+
+        List<SparePartTransaction> transactions = transactionRepository.findByTransactionTypeAndNameAndTransactionDateBetween(
+                transactionType, name, startDate, endDate);
+
+        if (transactions.isEmpty()) {
+            throw new RuntimeException("No transactions found for type: " + transactionType +
+                    ", name: " + name + ", between " + startDate + " and " + endDate);
+        }
+
+        return transactions.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SparePartTransactionDto> getByNameOrPartNumber(String name, String partNumber) {
+        if ((name == null || name.trim().isEmpty()) && (partNumber == null || partNumber.trim().isEmpty())) {
+            throw new IllegalArgumentException("Either name or part number must be provided.");
+        }
+
+        List<SparePartTransaction> transactions;
+
+        if (name != null && !name.trim().isEmpty() && partNumber != null && !partNumber.trim().isEmpty()) {
+            transactions = transactionRepository.findByNameOrPartNumber(name, partNumber);
+        } else if (name != null && !name.trim().isEmpty()) {
+            transactions = transactionRepository.findByName(name);
+        } else {
+            transactions = transactionRepository.findByPartNumber(partNumber);
+        }
+
+        if (transactions.isEmpty()) {
+            throw new RuntimeException("No transactions found for given filters.");
+        }
+
+        return transactions.stream().map(this::toDto).collect(Collectors.toList());
+    }
+
 
     private SparePartTransactionDto toDto(SparePartTransaction transaction) {
         return SparePartTransactionDto.builder()
