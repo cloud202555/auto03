@@ -148,5 +148,6 @@ public class SparePartTransactionController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(ResponseDto.error("No transactions found for given filters", e.getMessage()));
         }
+
     }
 }
