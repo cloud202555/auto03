@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,22 +72,21 @@ public class VehicleRegServiceImpl implements VehicleRegService {
                 .collect(Collectors.toList());
     }
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD");
 
     @Override
     public List<VehicleRegDto> getByDateRange(String startDate, String endDate) {
         try {
-
-            Date start = dateFormat.parse(startDate);
-            Date end = dateFormat.parse(endDate);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate start = LocalDate.parse(startDate, formatter);
+            LocalDate end = LocalDate.parse(endDate, formatter);
 
             List<VehicleReg> vehicleRegs = vehicleRegRepository.findByDateBetween(start, end);
-
 
             return vehicleRegs.stream()
                     .map(VehicleRegDto::new)
                     .collect(Collectors.toList());
-        } catch (ParseException e) {
+        } catch (DateTimeParseException e) {
             throw new RuntimeException("Invalid date format. Use 'yyyy-MM-dd'");
         }
     }

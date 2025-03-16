@@ -6,7 +6,7 @@ import lombok.Data;
 @Entity
 @Data
 @Table(name = "vendor", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
-public class Vendor {  // Class name should start with uppercase
+public class Vendor {
     @Id
     @Column(nullable = false, updatable = false)
     @SequenceGenerator(
@@ -21,7 +21,7 @@ public class Vendor {  // Class name should start with uppercase
     )
     private Integer vendorId;
 
-    @Column(unique = true, nullable = false)  // Ensuring name is unique and not null
+    @Column(unique = true, nullable = false)
     private String name;
 
     @Column
