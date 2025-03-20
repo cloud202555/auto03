@@ -135,10 +135,10 @@ public class SparePartServiceImpl implements SparePartService {
 
     @Override
     public Page<SparePartDto> getAllSpareParts(int page, int size) {
-        Sort sort = Sort.by("sparePartId").descending(); // Sorting by sparePartId in descending order
+        Sort sort = Sort.by("sparePartId").descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<SparePart> sparePartsPage = sparePartRepo.findAll(pageable);
+        Page<SparePart> sparePartsPage = sparePartRepo.findAllWithPhotos(pageable);
 
         if (sparePartsPage.isEmpty()) {
             throw new RuntimeException("No data found");
@@ -146,7 +146,6 @@ public class SparePartServiceImpl implements SparePartService {
 
         return sparePartsPage.map(SparePartMappers::toDto);
     }
-
 
     @Override
     public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {
