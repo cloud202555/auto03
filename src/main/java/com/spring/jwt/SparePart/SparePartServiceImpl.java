@@ -69,8 +69,6 @@ public class SparePartServiceImpl implements SparePartService {
                     .cGST(cGST)
                     .buyingPrice(buyingPrice)
                     .totalGST(totalGST)
-                    .make(make)
-                    .vendor(vendor)
                     .build();
 
 
@@ -90,8 +88,7 @@ public class SparePartServiceImpl implements SparePartService {
                     .cGST(cGST)
                     .buyingPrice(buyingPrice)
                     .totalGST(totalGST)
-                    .make(make)
-                    .vendor(vendor)
+
                     .build();
 
             userPartRepo.save(userPart);
@@ -127,8 +124,6 @@ public class SparePartServiceImpl implements SparePartService {
                 .cGST(sparePart.getCGST())
                 .sGST(sparePart.getSGST())
                 .buyingPrice(sparePart.getBuyingPrice())
-                .vendor(sparePart.getVendor())
-                .make(sparePart.getMake())
                 .build()
         ).orElse(null);
     }
@@ -161,9 +156,6 @@ public class SparePartServiceImpl implements SparePartService {
         Optional.ofNullable(sGST).ifPresent(sparePart::setSGST);
         Optional.ofNullable(totalGST).ifPresent(sparePart::setTotalGST);
         Optional.ofNullable(buyingPrice).ifPresent(sparePart::setBuyingPrice);
-        Optional.ofNullable(make).ifPresent(sparePart::setMake);
-        Optional.ofNullable(vendor).ifPresent(sparePart::setVendor);
-
 
         if (photos != null && !photos.isEmpty()) {
             try {

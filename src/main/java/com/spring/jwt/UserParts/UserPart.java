@@ -64,11 +64,5 @@ public class UserPart {
     @Column
     private Integer buyingPrice;
 
-    @Column
-    private String make;
-
-    @Column
-    private String vendor;
-
 
 }
