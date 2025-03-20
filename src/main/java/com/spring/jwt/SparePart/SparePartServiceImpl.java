@@ -129,7 +129,7 @@ public class SparePartServiceImpl implements SparePartService {
     }
 
     @Override
-    public Page<SparePartDto> getAllSpareParts(int page, int size) {
+    public PaginatedResponse<SparePartDto> getAllSpareParts(int page, int size) {
         Sort sort = Sort.by("sparePartId").descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
@@ -139,8 +139,16 @@ public class SparePartServiceImpl implements SparePartService {
             throw new RuntimeException("No data found");
         }
 
-        return sparePartsPage.map(SparePartMappers::toDto);
+        List<SparePartDto> sparePartsDtoList = sparePartsPage.map(SparePartMappers::toDto).getContent();
+
+        return new PaginatedResponse<>(
+                sparePartsDtoList,
+                sparePartsPage.getTotalPages(),
+                sparePartsPage.getTotalElements(),
+                page
+        );
     }
+
 
     @Override
     public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {
