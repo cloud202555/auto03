@@ -324,6 +324,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .userId(transaction.getUserId())
                 .billNo(transaction.getBillNo())
                 .customerName(transaction.getCustomerName())
+                .name(transaction.getName())
                 .build();
     }
+
 }

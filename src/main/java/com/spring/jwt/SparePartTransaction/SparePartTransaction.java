@@ -29,7 +29,6 @@ public class SparePartTransaction {
     @Column(name = "part_name", nullable = false)
     private String partName;
 
-
     @Column(name = "manufacturer", nullable = false)
     @NotBlank(message = "manufacturer name cannot be blank")
     private String manufacturer;

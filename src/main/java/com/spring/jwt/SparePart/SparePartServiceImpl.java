@@ -7,6 +7,7 @@ import com.spring.jwt.VehicleReg.BadRequestException;
 import com.spring.jwt.exception.SparePartNotFoundException;
 import com.spring.jwt.utils.BaseResponseDTO;
 import com.spring.jwt.utils.ImageCompressionUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,12 +188,15 @@ public class SparePartServiceImpl implements SparePartService {
 
         return sparePartMapper.toDto(updatedPart);
     }
+    @Transactional
     @Override
     public BaseResponseDTO deleteSparePartById(Integer id, Integer photoIndex) {
         return sparePartRepo.findById(id)
                 .map(sparePart -> {
-                    if (photoIndex != null) {
 
+                    userPartRepo.deleteBySparePart(sparePart);
+
+                    if (photoIndex != null) {
                         List<byte[]> photos = sparePart.getPhoto();
                         if (photoIndex >= 0 && photoIndex < photos.size()) {
                             photos.remove(photoIndex.intValue());
@@ -215,7 +219,6 @@ public class SparePartServiceImpl implements SparePartService {
                 })
                 .orElseThrow(() -> new SparePartNotFoundException("Not found with ID: " + id));
     }
-
 
 
 }
