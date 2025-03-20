@@ -41,7 +41,6 @@ public class SparePartController {
     public List<SparePartDto> getAllSpareParts() {
         return sparePartService.getAllSpareParts();
     }
-
     @PostMapping("/addPart")
     public ResponseEntity<BaseResponseDTO> addPart(
             @RequestParam("partName") String partName,
@@ -50,16 +49,17 @@ public class SparePartController {
             @RequestParam("price") Long price,
             @RequestParam("partNumber") String partNumber,
             @RequestParam("photos") List<MultipartFile> photos,
+            @RequestParam("sGST") Integer sGST,
             @RequestParam("cGST") Integer cGST,
-            @RequestParam("buyingPrice") Integer buyingPrice,
             @RequestParam("totalGST") Integer totalGST,
-            @RequestParam("sGST") Integer sGST) {
+            @RequestParam("buyingPrice") Integer buyingPrice) {
 
         BaseResponseDTO response = sparePartService.addPart(
-                partName, description, manufacturer, price, partNumber, photos,cGST,sGST,buyingPrice,totalGST);
+                partName, description, manufacturer, price, partNumber, photos, sGST, cGST, totalGST, buyingPrice);
 
         return ResponseEntity.ok(response);
     }
+
 
 
     @PatchMapping("/update/{id}")
@@ -71,16 +71,18 @@ public class SparePartController {
             @RequestParam(required = false) Long price,
             @RequestParam(required = false) String partNumber,
             @RequestParam(required = false) List<MultipartFile> photos,
+            @RequestParam(required = false) Integer sGST,
             @RequestParam(required = false) Integer cGST,
-            @RequestParam(required = false) Integer buyingPrice,
             @RequestParam(required = false) Integer totalGST,
-            @RequestParam(required = false) Integer sGST) {
+            @RequestParam(required = false) Integer buyingPrice) {
 
         SparePartDto updatedPart = sparePartService.updatePart(
-                id, partName, description, manufacturer, price, partNumber, photos, buyingPrice, totalGST, cGST, sGST);
+                id, partName, description, manufacturer, price, partNumber, photos, sGST, cGST, totalGST, buyingPrice);
 
         return ResponseEntity.ok(updatedPart);
     }
+
+
 
     @PreAuthorize("permitAll")
     @DeleteMapping("/delete/{id}")
