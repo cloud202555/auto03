@@ -59,4 +59,11 @@ public class SparePart {
     @Column
     private Integer buyingPrice;
 
+    @Column
+    private String make;
+
+    @Column
+    private String vendor;
+
+
 }
