@@ -1,5 +1,6 @@
 package com.spring.jwt.UserParts;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -25,14 +26,17 @@ public class UserPartController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<?> getAllUserParts() {
+    public ResponseEntity<?> getAllUserParts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         try {
-            List<UserPartDto> userParts = userPartService.getAllUserParts();
+            Page<UserPartDto> userParts = userPartService.getAllUserParts(page, size);
             return ResponseEntity.ok(userParts);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to retrieve user parts: " + e.getMessage());
         }
     }
+
 
 }
 

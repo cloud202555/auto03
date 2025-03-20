@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -130,12 +134,19 @@ public class SparePartServiceImpl implements SparePartService {
     }
 
     @Override
-    public List<SparePartDto> getAllSpareParts() {
-        List<SparePart> spareParts = sparePartRepo.findAll();
-        return spareParts.stream()
-                .map(SparePartMappers::toDto)
-                .collect(Collectors.toList());
+    public Page<SparePartDto> getAllSpareParts(int page, int size) {
+        Sort sort = Sort.by("sparePartId").descending(); // Sorting by sparePartId in descending order
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<SparePart> sparePartsPage = sparePartRepo.findAll(pageable);
+
+        if (sparePartsPage.isEmpty()) {
+            throw new RuntimeException("No data found");
+        }
+
+        return sparePartsPage.map(SparePartMappers::toDto);
     }
+
 
     @Override
     public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {

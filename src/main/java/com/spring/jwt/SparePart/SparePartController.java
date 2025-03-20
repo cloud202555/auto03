@@ -2,6 +2,7 @@ package com.spring.jwt.SparePart;
 
 import com.spring.jwt.utils.BaseResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,9 +39,17 @@ public class SparePartController {
 
 
     @GetMapping("/getAll")
-    public List<SparePartDto> getAllSpareParts() {
-        return sparePartService.getAllSpareParts();
+    public ResponseEntity<?> getAllSpareParts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        try {
+            Page<SparePartDto> spareParts = sparePartService.getAllSpareParts(page, size);
+            return ResponseEntity.ok(spareParts);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Failed to retrieve spare parts: " + e.getMessage());
+        }
     }
+
     @PostMapping("/addPart")
     public ResponseEntity<BaseResponseDTO> addPart(
             @RequestParam("partName") String partName,
