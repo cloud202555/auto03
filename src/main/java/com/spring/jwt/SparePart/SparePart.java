@@ -36,7 +36,7 @@ public class SparePart {
     @Column(name = "price", nullable = false)
     private Long price;
 
-    @Column(name = "update_At")
+    @Column(name = "update_At", nullable = false)
     private LocalDate updateAt;
 
     @ElementCollection
@@ -58,12 +58,6 @@ public class SparePart {
 
     @Column
     private Integer buyingPrice;
-
-    @Column
-    private String make;
-
-    @Column
-    private String vendor;
 
 
 
