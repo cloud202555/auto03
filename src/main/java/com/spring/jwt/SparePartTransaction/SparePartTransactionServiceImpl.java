@@ -75,15 +75,21 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         userPartRepository.save(userPart);
 
-        // **Ensure name is saved for both CREDIT and DEBIT**
+        // **Calculate GST and Final Price**
+        double cgstAmount = (sparePart.getPrice() * sparePart.getCGST()) / 100.0;
+        double sgstAmount = (sparePart.getPrice() * sparePart.getSGST()) / 100.0;
+        double totalGST = cgstAmount + sgstAmount;
+        double finalPrice = sparePart.getPrice() + totalGST;
+
+        // **Save Transaction**
         SparePartTransaction transaction = SparePartTransaction.builder()
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
                 .partName(sparePart.getPartName())
                 .manufacturer(sparePart.getManufacturer())
                 .customerName(transactionDto.getCustomerName())
-                .price(sparePart.getPrice())
-                .qtyPrice(sparePart.getPrice() * transactionDto.getQuantity())
+                .price((long) finalPrice) // Price including GST
+                .qtyPrice((long) (finalPrice * transactionDto.getQuantity())) // GST applied to total qty
                 .updateAt(sparePart.getUpdateAt())
                 .transactionType(transactionDto.getTransactionType())
                 .quantity(transactionDto.getQuantity())
@@ -91,12 +97,14 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .transactionDate(LocalDateTime.now())
                 .userId(userId)
                 .billNo(transactionDto.getBillNo())
-                .name(transactionDto.getName()) // **Ensure name is saved**
+                .name(transactionDto.getName())
+                .totalGST((int) totalGST) // Save Total GST
                 .build();
 
         transaction = transactionRepository.save(transaction);
         return toDto(transaction);
     }
+
 
 
     @Override
