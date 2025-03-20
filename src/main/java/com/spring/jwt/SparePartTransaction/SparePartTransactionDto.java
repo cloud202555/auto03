@@ -1,5 +1,6 @@
 package com.spring.jwt.SparePartTransaction;
 
+import jakarta.persistence.Column;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,4 +28,7 @@ public class SparePartTransactionDto {
     private Integer vehicleRegId;
     private String customerName;
     private String name;
+    private Integer cGST;
+    private Integer sGST;
+    private Integer totalGST;
 }

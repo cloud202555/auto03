@@ -67,4 +67,12 @@ public class SparePartTransaction {
     @Column(name = "vendorName")
     private String name;
 
+    @Column
+    private Integer cGST;
+
+    @Column
+    private Integer sGST;
+
+    @Column
+    private Integer totalGST;
 }

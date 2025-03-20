@@ -1,8 +1,12 @@
 package com.spring.jwt.UserParts;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 public class UserPartServiceImpl implements UserPartService {
@@ -21,14 +25,14 @@ public class UserPartServiceImpl implements UserPartService {
     }
 
     @Override
-    public List<UserPartDto> getAllUserParts() {
+    public Page<UserPartDto> getAllUserParts(int page, int size) {
+        Sort sort = Sort.by("userPartId").descending(); // Sorting by userPartId in descending order
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<UserPart> userPartPage = userPartRepository.findAll(pageable);
+        if (userPartPage.isEmpty()) {
+            throw new RuntimeException("No data found");
+        }
+        return userPartPage.map(UserPartDto::new);
+    }
 
-        List<UserPart> userPart = userPartRepository.findAll();
-                if(userPart.isEmpty()){
-                    throw new RuntimeException("Internal Server Error Cannot Find Data");
-                }
-                 return userPart.stream()
-                         .map(UserPartDto::new)
-                         .collect(Collectors.toList());
-                }
 }
