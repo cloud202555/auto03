@@ -75,7 +75,6 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         userPartRepository.save(userPart);
 
-        // **Ensure name is saved for both CREDIT and DEBIT**
         SparePartTransaction transaction = SparePartTransaction.builder()
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
