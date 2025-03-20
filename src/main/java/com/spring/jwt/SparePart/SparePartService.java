@@ -13,7 +13,7 @@ public interface SparePartService {
 
     SparePartDto getSparePartById(Integer id);
 
-    public Page<SparePartDto> getAllSpareParts(int page, int size);
+    public PaginatedResponse<SparePartDto> getAllSpareParts(int page, int size);
 
     public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor);
 

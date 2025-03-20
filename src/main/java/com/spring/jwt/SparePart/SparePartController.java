@@ -41,14 +41,15 @@ public class SparePartController {
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSpareParts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "30") int size) {
         try {
-            Page<SparePartDto> spareParts = sparePartService.getAllSpareParts(page, size);
-            return ResponseEntity.ok(spareParts);
+            PaginatedResponse<SparePartDto> response = sparePartService.getAllSpareParts(page, size);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to retrieve spare parts: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/addPart")
     public ResponseEntity<BaseResponseDTO> addPart(
