@@ -34,10 +34,10 @@ public class UserPart {
     @Column(name = "manufacturer", nullable = false)
     private String manufacturer;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price")
     private Long price;
 
-    @Column(name = "update_At", nullable = false)
+    @Column(name = "update_At")
     private LocalDate updateAt;
 
     @ElementCollection
@@ -63,6 +63,12 @@ public class UserPart {
 
     @Column
     private Integer buyingPrice;
+
+    @Column
+    private String make;
+
+    @Column
+    private String vendor;
 
 
 }

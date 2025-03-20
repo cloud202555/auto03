@@ -53,10 +53,12 @@ public class SparePartController {
             @RequestParam("cGST") Integer cGST,
             @RequestParam("buyingPrice") Integer buyingPrice,
             @RequestParam("totalGST") Integer totalGST,
-            @RequestParam("sGST") Integer sGST) {
+            @RequestParam("sGST") Integer sGST,
+            @RequestParam("make") String make,
+            @RequestParam("vendor") String vendor){
 
         BaseResponseDTO response = sparePartService.addPart(
-                partName, description, manufacturer, price, partNumber, photos,cGST,sGST,buyingPrice,totalGST);
+                partName, description, manufacturer, price, partNumber, photos,cGST,sGST,buyingPrice,totalGST,make,vendor);
 
         return ResponseEntity.ok(response);
     }
@@ -74,10 +76,12 @@ public class SparePartController {
             @RequestParam(required = false) Integer cGST,
             @RequestParam(required = false) Integer buyingPrice,
             @RequestParam(required = false) Integer totalGST,
-            @RequestParam(required = false) Integer sGST) {
+            @RequestParam(required = false) Integer sGST,
+             @RequestParam(required = false) String make,
+            @RequestParam(required = false) String vendor) {
 
         SparePartDto updatedPart = sparePartService.updatePart(
-                id, partName, description, manufacturer, price, partNumber, photos, buyingPrice, totalGST, cGST, sGST);
+                id, partName, description, manufacturer, price, partNumber, photos, buyingPrice, totalGST, cGST, sGST,make,vendor);
 
         return ResponseEntity.ok(updatedPart);
     }

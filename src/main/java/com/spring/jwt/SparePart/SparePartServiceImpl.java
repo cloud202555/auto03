@@ -35,7 +35,7 @@ public class SparePartServiceImpl implements SparePartService {
     public static final Logger logger = LoggerFactory.getLogger(SparePartServiceImpl.class);
 
     @Override
-    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
+    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {
         Optional<SparePart> existingPart = sparePartRepo.findByPartNumberAndManufacturer(partNumber, manufacturer);
         if (existingPart.isPresent()) {
             throw new BadRequestException("Part with part number " + partNumber + " already exists for manufacturer " + manufacturer);
@@ -64,7 +64,10 @@ public class SparePartServiceImpl implements SparePartService {
                     .cGST(cGST)
                     .buyingPrice(buyingPrice)
                     .totalGST(totalGST)
+                    .make(make)
+                    .vendor(vendor)
                     .build();
+
 
             sparePart = sparePartRepo.save(sparePart);
 
@@ -82,6 +85,8 @@ public class SparePartServiceImpl implements SparePartService {
                     .cGST(cGST)
                     .buyingPrice(buyingPrice)
                     .totalGST(totalGST)
+                    .make(make)
+                    .vendor(vendor)
                     .build();
 
             userPartRepo.save(userPart);
@@ -117,6 +122,7 @@ public class SparePartServiceImpl implements SparePartService {
                 .cGST(sparePart.getCGST())
                 .sGST(sparePart.getSGST())
                 .buyingPrice(sparePart.getBuyingPrice())
+
                 .build()
         ).orElse(null);
     }
@@ -130,7 +136,7 @@ public class SparePartServiceImpl implements SparePartService {
     }
 
     @Override
-    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
+    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {
         SparePart sparePart = sparePartRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Spare part not found"));
 
@@ -143,6 +149,8 @@ public class SparePartServiceImpl implements SparePartService {
         Optional.ofNullable(sGST).ifPresent(sparePart::setSGST);
         Optional.ofNullable(totalGST).ifPresent(sparePart::setTotalGST);
         Optional.ofNullable(buyingPrice).ifPresent(sparePart::setBuyingPrice);
+        Optional.ofNullable(make).ifPresent(sparePart::setMake);
+        Optional.ofNullable(vendor).ifPresent(sparePart::setVendor);
 
 
         if (photos != null && !photos.isEmpty()) {
