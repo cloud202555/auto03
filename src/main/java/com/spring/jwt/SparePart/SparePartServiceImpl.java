@@ -123,7 +123,8 @@ public class SparePartServiceImpl implements SparePartService {
                 .cGST(sparePart.getCGST())
                 .sGST(sparePart.getSGST())
                 .buyingPrice(sparePart.getBuyingPrice())
-
+                .vendor(sparePart.getVendor())
+                .make(sparePart.getMake())
                 .build()
         ).orElse(null);
     }
