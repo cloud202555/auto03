@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -41,6 +43,7 @@ public class SparePart {
 
     @ElementCollection
     @CollectionTable(name = "spare_part_photos", joinColumns = @JoinColumn(name = "spare_part_id"))
+    @BatchSize(size = 10)
     @Column(name = "photo", columnDefinition = "LONGBLOB")
     private List<byte[]> photo;
 

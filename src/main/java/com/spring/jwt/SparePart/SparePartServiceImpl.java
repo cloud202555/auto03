@@ -138,7 +138,7 @@ public class SparePartServiceImpl implements SparePartService {
         Sort sort = Sort.by("sparePartId").descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<SparePart> sparePartsPage = sparePartRepo.findAllWithPhotos(pageable);
+        Page<SparePart> sparePartsPage = sparePartRepo.findAll(pageable);
 
         if (sparePartsPage.isEmpty()) {
             throw new RuntimeException("No data found");
