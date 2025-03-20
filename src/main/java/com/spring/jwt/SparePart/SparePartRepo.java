@@ -2,6 +2,7 @@ package com.spring.jwt.SparePart;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,9 +16,8 @@ import java.util.Optional;
 public interface SparePartRepo extends JpaRepository<SparePart, Integer>, JpaSpecificationExecutor<SparePart> {
     Optional<Object> findByPartNumber(String partNumber);
 
-    @Query(value = "select distinct sp from SparePart sp left join fetch sp.photo",
-            countQuery = "select count(sp) from SparePart sp")
-    Page<SparePart> findAllWithPhotos(Pageable pageable);
+    @EntityGraph(attributePaths = {"photo"})
+    Page<SparePart> findAll(Pageable pageable);
 
     @Query("SELECT s FROM SparePart s " +
             "WHERE LOWER(s.partName) LIKE CONCAT('%', LOWER(:keyword), '%') " +
