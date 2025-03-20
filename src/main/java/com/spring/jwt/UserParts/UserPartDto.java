@@ -25,8 +25,6 @@ public class UserPartDto {
     private Integer sGST;
     private Integer totalGST;
     private Integer buyingPrice;
-    private String make;
-    private String vendor;
 
     public UserPartDto(UserPart userPart) {
         this.userPartId = userPart.getUserPartId();
@@ -42,8 +40,6 @@ public class UserPartDto {
         this.sGST=userPart.getSGST();
         this.totalGST=userPart.getTotalGST();
         this.buyingPrice=userPart.getBuyingPrice();
-        this.make=userPart.getMake();
-        this.vendor=userPart.getVendor();
 
     }
 
