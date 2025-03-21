@@ -1,6 +1,11 @@
 package com.spring.jwt.UserParts;
 
+import com.spring.jwt.FilterController.SparePartAllDto;
+import com.spring.jwt.SparePart.PaginatedResponse;
+import com.spring.jwt.SparePart.SparePartDto;
+import com.spring.jwt.exception.PageNotFoundException;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -28,15 +33,14 @@ public class UserPartController {
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllUserParts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "30") int size) {
         try {
-            Page<UserPartDto> userParts = userPartService.getAllUserParts(page, size);
+            PaginatedResponse<UserPartDto> userParts = userPartService.getAllUserParts(page, size);
             return ResponseEntity.ok(userParts);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Failed to retrieve user parts: " + e.getMessage());
         }
     }
-
 
 }
 
