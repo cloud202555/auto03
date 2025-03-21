@@ -40,6 +40,9 @@ public class UserPartDto {
         this.sGST=userPart.getSGST();
         this.totalGST=userPart.getTotalGST();
         this.buyingPrice=userPart.getBuyingPrice();
+        this.sparePartId = userPart.getSparePart() != null
+                ? userPart.getSparePart().getSparePartId()
+                : null;
 
     }
 

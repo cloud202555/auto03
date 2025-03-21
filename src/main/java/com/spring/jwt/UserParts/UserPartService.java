@@ -1,5 +1,7 @@
 package com.spring.jwt.UserParts;
 
+import com.spring.jwt.SparePart.PaginatedResponse;
+import com.spring.jwt.SparePart.SparePartDto;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -9,6 +11,6 @@ public interface UserPartService {
 
     UserPartDto getUserPartById(Integer userPartId);
 
-    public Page<UserPartDto> getAllUserParts(int page, int size);
+    public PaginatedResponse<UserPartDto> getAllUserParts(int page, int size);
 
 }

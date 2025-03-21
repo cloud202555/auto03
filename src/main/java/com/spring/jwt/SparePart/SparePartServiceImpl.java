@@ -1,6 +1,5 @@
 package com.spring.jwt.SparePart;
 
-import com.spring.jwt.MapperClasses.SparePartMappers;
 import com.spring.jwt.UserParts.UserPart;
 import com.spring.jwt.UserParts.UserPartRepository;
 import com.spring.jwt.VehicleReg.BadRequestException;
@@ -133,13 +132,29 @@ public class SparePartServiceImpl implements SparePartService {
         Sort sort = Sort.by("sparePartId").descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<SparePart> sparePartsPage = sparePartRepo.findAll(pageable);
+        Page<SparePartProjection> sparePartsPage = sparePartRepo.findAllProjectedBy(pageable);
 
         if (sparePartsPage.isEmpty()) {
             throw new RuntimeException("No data found");
         }
 
-        List<SparePartDto> sparePartsDtoList = sparePartsPage.map(SparePartMappers::toDto).getContent();
+        List<SparePartDto> sparePartsDtoList = sparePartsPage
+                .map(projection -> {
+                    List<String> base64Photos = null;
+                    if (projection.getPhoto() != null) {
+                        base64Photos = projection.getPhoto().stream()
+                                .map(bytes -> Base64.getEncoder().encodeToString(bytes))
+                                .collect(Collectors.toList());
+                    }
+                    return SparePartDto.builder()
+                            .sparePartId(projection.getSparePartId())
+                            .partName(projection.getPartName())
+                            .manufacturer(projection.getManufacturer())
+                            .price(projection.getPrice())
+                            .photo(base64Photos)
+                            .build();
+                })
+                .getContent();
 
         return new PaginatedResponse<>(
                 sparePartsDtoList,
@@ -238,6 +253,5 @@ public class SparePartServiceImpl implements SparePartService {
                 })
                 .orElseThrow(() -> new SparePartNotFoundException("Not found with ID: " + id));
     }
-
 
 }

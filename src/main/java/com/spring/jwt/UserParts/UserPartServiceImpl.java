@@ -1,11 +1,14 @@
 package com.spring.jwt.UserParts;
 
+import com.spring.jwt.SparePart.PaginatedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -25,14 +28,34 @@ public class UserPartServiceImpl implements UserPartService {
     }
 
     @Override
-    public Page<UserPartDto> getAllUserParts(int page, int size) {
-        Sort sort = Sort.by("userPartId").descending(); // Sorting by userPartId in descending order
+    public PaginatedResponse<UserPartDto> getAllUserParts(int page, int size) {
+        Sort sort = Sort.by("userPartId").descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<UserPart> userPartPage = userPartRepository.findAll(pageable);
+        Page<UserPartProjection> userPartPage = userPartRepository.findAllProjected(pageable);
+
         if (userPartPage.isEmpty()) {
             throw new RuntimeException("No data found");
         }
-        return userPartPage.map(UserPartDto::new);
+
+        List<UserPartDto> userPartDtoList = userPartPage
+                .map(projection -> UserPartDto.builder()
+                        .userPartId(projection.getUserPartId())
+                        .partNumber(projection.getPartNumber())
+                        .partName(projection.getPartName())
+                        .manufacturer(projection.getManufacturer())
+                        .quantity(projection.getQuantity())
+                        .price(projection.getPrice())
+                        .updateAt(projection.getUpdateAt())
+                        .description(projection.getDescription())
+                        .build())
+                .getContent();
+
+        return new PaginatedResponse<>(
+                userPartDtoList,
+                userPartPage.getTotalPages(),
+                userPartPage.getTotalElements(),
+                page
+        );
     }
 
 }
