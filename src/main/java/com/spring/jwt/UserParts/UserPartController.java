@@ -42,5 +42,11 @@ public class UserPartController {
         }
     }
 
+    @GetMapping("/quantity/{partNumber}")
+    public ResponseEntity<Integer> getQuantity(@PathVariable String partNumber) {
+        Integer quantity = userPartService.getQuantityByPartNumber(partNumber);
+        return ResponseEntity.ok(quantity);
+    }
+
 }
 

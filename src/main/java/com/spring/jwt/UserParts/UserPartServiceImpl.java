@@ -1,6 +1,7 @@
 package com.spring.jwt.UserParts;
 
 import com.spring.jwt.SparePart.PaginatedResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
@@ -57,5 +58,12 @@ public class UserPartServiceImpl implements UserPartService {
                 page
         );
     }
+    @Override
+    public Integer getQuantityByPartNumber(String partNumber) {
+        return userPartRepository.findQuantityByPartNumber(partNumber)
+                .orElseThrow(() -> new IllegalArgumentException("No stock entry found for Part Number: " + partNumber));
+    }
+
+
 
 }
