@@ -13,4 +13,5 @@ public interface UserPartService {
 
     public PaginatedResponse<UserPartDto> getAllUserParts(int page, int size);
 
+    Integer getQuantityByPartNumber(String partNumber);
 }
