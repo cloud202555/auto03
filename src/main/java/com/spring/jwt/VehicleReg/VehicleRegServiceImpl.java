@@ -14,6 +14,11 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.lang.reflect.Field;
+import java.util.Map;
+
+import org.springframework.util.ReflectionUtils;
+import org.springframework.stereotype.Service;
 
 @Service
 public class VehicleRegServiceImpl implements VehicleRegService {
@@ -48,10 +53,88 @@ public class VehicleRegServiceImpl implements VehicleRegService {
     public VehicleRegDto updateVehicleReg(Integer vehicleRegId, VehicleRegDto vehicleRegDto) {
         VehicleReg vehicleReg = vehicleRegRepository.findById(vehicleRegId)
                 .orElseThrow(() -> new RuntimeException("VehicleReg not found"));
-        copyDtoToEntity(vehicleRegDto, vehicleReg);
+
+        // Check and update only non-null fields
+        if (vehicleRegDto.getVehicleNumber() != null) {
+            vehicleReg.setVehicleNumber(vehicleRegDto.getVehicleNumber());
+        }
+        if (vehicleRegDto.getVehicleBrand() != null) {
+            vehicleReg.setVehicleBrand(vehicleRegDto.getVehicleBrand());
+        }
+        if (vehicleRegDto.getVehicleModelName() != null) {
+            vehicleReg.setVehicleModelName(vehicleRegDto.getVehicleModelName());
+        }
+        if (vehicleRegDto.getVehicleVariant() != null) {
+            vehicleReg.setVehicleVariant(vehicleRegDto.getVehicleVariant());
+        }
+        if (vehicleRegDto.getEngineNumber() != null) {
+            vehicleReg.setEngineNumber(vehicleRegDto.getEngineNumber());
+        }
+        if (vehicleRegDto.getChasisNumber() != null) {
+            vehicleReg.setChasisNumber(vehicleRegDto.getChasisNumber());
+        }
+        if (vehicleRegDto.getNumberPlateColour() != null) {
+            vehicleReg.setNumberPlateColour(vehicleRegDto.getNumberPlateColour());
+        }
+        if (vehicleRegDto.getKmsDriven() != null) {
+            vehicleReg.setKmsDriven(vehicleRegDto.getKmsDriven());
+        }
+        if (vehicleRegDto.getCustomerId() != null) {
+            vehicleReg.setCustomerId(vehicleRegDto.getCustomerId());
+        }
+        if (vehicleRegDto.getCustomerName() != null) {
+            vehicleReg.setCustomerName(vehicleRegDto.getCustomerName());
+        }
+        if (vehicleRegDto.getCustomerAddress() != null) {
+            vehicleReg.setCustomerAddress(vehicleRegDto.getCustomerAddress());
+        }
+        if (vehicleRegDto.getCustomerMobileNumber() != null) {
+            vehicleReg.setCustomerMobileNumber(vehicleRegDto.getCustomerMobileNumber());
+        }
+        if (vehicleRegDto.getCustomerAadharNo() != null) {
+            vehicleReg.setCustomerAadharNo(vehicleRegDto.getCustomerAadharNo());
+        }
+        if (vehicleRegDto.getCustomerGstin() != null) {
+            vehicleReg.setCustomerGstin(vehicleRegDto.getCustomerGstin());
+        }
+        if (vehicleRegDto.getSuperwiser() != null) {
+            vehicleReg.setSuperwiser(vehicleRegDto.getSuperwiser());
+        }
+        if (vehicleRegDto.getTechnician() != null) {
+            vehicleReg.setTechnician(vehicleRegDto.getTechnician());
+        }
+        if (vehicleRegDto.getWorker() != null) {
+            vehicleReg.setWorker(vehicleRegDto.getWorker());
+        }
+        if (vehicleRegDto.getStatus() != null) {
+            vehicleReg.setStatus(vehicleRegDto.getStatus());
+        }
+        if (vehicleRegDto.getUserId() != null) {
+            vehicleReg.setUserId(vehicleRegDto.getUserId());
+        }
+        if (vehicleRegDto.getDate() != null) {
+            vehicleReg.setDate(vehicleRegDto.getDate());
+        }
+        if (vehicleRegDto.getVehicleInspection() != null) {
+            vehicleReg.setVehicleInspection(vehicleRegDto.getVehicleInspection());
+        }
+        if (vehicleRegDto.getJobCard() != null) {
+            vehicleReg.setJobCard(vehicleRegDto.getJobCard());
+        }
+        if (vehicleRegDto.getInsuranceStatus() != null) {
+            vehicleReg.setInsuranceStatus(vehicleRegDto.getInsuranceStatus());
+        }
+        if (vehicleRegDto.getInsuredFrom() != null) {
+            vehicleReg.setInsuredFrom(vehicleRegDto.getInsuredFrom());
+        }
+        if (vehicleRegDto.getInsuredTo() != null) {
+            vehicleReg.setInsuredTo(vehicleRegDto.getInsuredTo());
+        }
+
         vehicleReg = vehicleRegRepository.save(vehicleReg);
         return new VehicleRegDto(vehicleReg);
     }
+
 
     @Override
     public void deleteVehicleReg(Integer vehicleRegId) {

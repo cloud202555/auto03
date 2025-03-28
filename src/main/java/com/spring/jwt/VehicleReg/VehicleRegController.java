@@ -52,7 +52,7 @@ public class VehicleRegController {
     }
 
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     public ResponseDto<VehicleRegDto> updateVehicleReg(@RequestParam Integer vehicleRegId, @RequestBody VehicleRegDto vehicleRegDto) {
         try {
             VehicleRegDto updatedVehicleReg = vehicleRegService.updateVehicleReg(vehicleRegId, vehicleRegDto);
@@ -61,6 +61,8 @@ public class VehicleRegController {
             return ResponseDto.error("Error updating vehicle registration", e.getMessage());
         }
     }
+
+
 
     @DeleteMapping("/delete")
     public ResponseDto<String> deleteVehicleReg(@RequestParam Integer vehicleRegId) {
