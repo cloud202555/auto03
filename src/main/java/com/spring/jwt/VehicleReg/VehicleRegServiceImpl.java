@@ -54,7 +54,6 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         VehicleReg vehicleReg = vehicleRegRepository.findById(vehicleRegId)
                 .orElseThrow(() -> new RuntimeException("VehicleReg not found"));
 
-        // Check and update only non-null fields
         if (vehicleRegDto.getVehicleNumber() != null) {
             vehicleReg.setVehicleNumber(vehicleRegDto.getVehicleNumber());
         }
@@ -63,6 +62,12 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         }
         if (vehicleRegDto.getVehicleModelName() != null) {
             vehicleReg.setVehicleModelName(vehicleRegDto.getVehicleModelName());
+        }
+        if (vehicleRegDto.getManufactureYear() != null) {
+            vehicleReg.setManufactureYear(vehicleRegDto.getManufactureYear());
+        }
+        if (vehicleRegDto.getAdvancePayment() != null) {
+            vehicleReg.setAdvancePayment(vehicleRegDto.getAdvancePayment());
         }
         if (vehicleRegDto.getVehicleVariant() != null) {
             vehicleReg.setVehicleVariant(vehicleRegDto.getVehicleVariant());
