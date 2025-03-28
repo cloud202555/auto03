@@ -7,5 +7,6 @@ public interface SparePartProjection {
     String getPartName();
     String getManufacturer();
     Long getPrice();
+    String getPartNumber();
     List<byte[]> getPhoto();
 }

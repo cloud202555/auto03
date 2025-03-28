@@ -110,6 +110,8 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         vehicleReg.setEngineNumber(vehicleRegDto.getEngineNumber());
         vehicleReg.setChasisNumber(vehicleRegDto.getChasisNumber());
         vehicleReg.setNumberPlateColour(vehicleRegDto.getNumberPlateColour());
+        vehicleReg.setManufactureYear(vehicleRegDto.getManufactureYear());
+        vehicleReg.setAdvancePayment(vehicleRegDto.getAdvancePayment());
 
         vehicleReg.setCustomerId(vehicleRegDto.getCustomerId());
         vehicleReg.setCustomerName(vehicleRegDto.getCustomerName());

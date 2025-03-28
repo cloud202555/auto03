@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +33,6 @@ public interface SparePartRepo extends JpaRepository<SparePart, Integer>, JpaSpe
 //    List<SparePart> searchByKeyword(@Param("keyword") String keyword);
 
     Page<SparePartProjection> findAllProjectedBy(Pageable pageable);
+
 }
+

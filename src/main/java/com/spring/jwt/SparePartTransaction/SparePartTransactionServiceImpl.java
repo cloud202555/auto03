@@ -51,6 +51,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
         SparePart sparePart = sparePartRepository.findByPartNumberAndManufacturer(transactionDto.getPartNumber(), transactionDto.getManufacturer())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
 
+        System.err.println(sparePart);
         UserPart userPart = userPartRepository.findBySparePart_SparePartId(sparePart.getSparePartId())
                 .orElseThrow(() -> new IllegalArgumentException("No stock entry found for Spare Part ID: " + sparePart.getSparePartId()));
 
@@ -75,21 +76,19 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
         userPartRepository.save(userPart);
 
-        // **Calculate GST and Final Price**
         double cgstAmount = (sparePart.getPrice() * sparePart.getCGST()) / 100.0;
         double sgstAmount = (sparePart.getPrice() * sparePart.getSGST()) / 100.0;
         double totalGST = cgstAmount + sgstAmount;
         double finalPrice = sparePart.getPrice() + totalGST;
 
-        // **Save Transaction**
         SparePartTransaction transaction = SparePartTransaction.builder()
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
                 .partName(sparePart.getPartName())
                 .manufacturer(sparePart.getManufacturer())
                 .customerName(transactionDto.getCustomerName())
-                .price((long) finalPrice) // Price including GST
-                .qtyPrice((long) (finalPrice * transactionDto.getQuantity())) // GST applied to total qty
+                .price((long) finalPrice)
+                .qtyPrice((long) (finalPrice * transactionDto.getQuantity()))
                 .updateAt(sparePart.getUpdateAt())
                 .transactionType(transactionDto.getTransactionType())
                 .quantity(transactionDto.getQuantity())
@@ -98,14 +97,12 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .userId(userId)
                 .billNo(transactionDto.getBillNo())
                 .name(transactionDto.getName())
-                .totalGST((int) totalGST) // Save Total GST
+                .totalGST((int) totalGST)
                 .build();
 
         transaction = transactionRepository.save(transaction);
         return toDto(transaction);
     }
-
-
 
     @Override
     public SparePartTransactionDto getTransactionById(Integer transactionId) {
@@ -145,22 +142,19 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
 
     @Override
     public void deleteTransaction(Integer transactionId) {
-        // Fetch the transaction
         SparePartTransaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new RuntimeException("Transaction not found with ID: " + transactionId));
 
-        // Fetch the associated UserPart
         UserPart userPart = userPartRepository.findBySparePart_SparePartId(transaction.getSparePartId())
                 .orElseThrow(() -> new RuntimeException("No stock entry found for Spare Part ID: " + transaction.getSparePartId()));
 
-        // Adjust UserPart quantity based on transaction type
         if (transaction.getTransactionType() == TransactionType.CREDIT) {
             if (userPart.getQuantity() < transaction.getQuantity()) {
                 throw new RuntimeException("Cannot delete CREDIT transaction: Not enough stock to reverse.");
             }
-            userPart.setQuantity(userPart.getQuantity() - transaction.getQuantity()); // Reduce stock
+            userPart.setQuantity(userPart.getQuantity() - transaction.getQuantity());
         } else if (transaction.getTransactionType() == TransactionType.DEBIT) {
-            userPart.setQuantity(userPart.getQuantity() + transaction.getQuantity()); // Add stock back
+            userPart.setQuantity(userPart.getQuantity() + transaction.getQuantity());
         }
         userPartRepository.save(userPart);
 

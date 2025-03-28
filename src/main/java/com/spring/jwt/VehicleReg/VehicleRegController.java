@@ -38,6 +38,7 @@ public class VehicleRegController {
     @PostMapping("/add")
     public ResponseEntity<ResponseDto<VehicleRegDto>> createVehicleReg(@RequestBody VehicleRegDto vehicleRegDto) {
         try {
+            System.err.println(vehicleRegDto);
             VehicleRegDto createdVehicleReg = vehicleRegService.createVehicleReg(vehicleRegDto);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ResponseDto.success("Vehicle Registration created successfully", createdVehicleReg));
