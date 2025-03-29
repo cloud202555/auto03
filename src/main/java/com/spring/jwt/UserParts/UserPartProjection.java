@@ -17,5 +17,5 @@ public interface UserPartProjection {
     Integer getSGST();
     Integer getTotalGST();
     Integer getBuyingPrice();
-
+    String getVendor();
 }
