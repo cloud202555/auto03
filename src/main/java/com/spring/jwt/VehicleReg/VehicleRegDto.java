@@ -20,6 +20,12 @@ public class VehicleRegDto {
     private String numberPlateColour;
     private Integer kmsDriven;
 
+    private String email;
+
+    private Integer ManufactureYear;
+
+    private Integer advancePayment;
+
     private Integer customerId;
     private String customerName;
     private String customerAddress;
@@ -67,8 +73,11 @@ public class VehicleRegDto {
         this.superwiser = vehicleReg.getSuperwiser();
         this.technician = vehicleReg.getTechnician();
         this.worker = vehicleReg.getWorker();
+        this.advancePayment=vehicleReg.getAdvancePayment();
+        this.ManufactureYear=vehicleReg.getManufactureYear();
         this.status = vehicleReg.getStatus();
         this.userId = vehicleReg.getUserId();
         this.date = vehicleReg.getDate();
+        this.email=vehicleReg.getEmail();
     }
 }

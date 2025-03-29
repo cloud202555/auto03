@@ -39,7 +39,7 @@ public class SparePartServiceImpl implements SparePartService {
     public static final Logger logger = LoggerFactory.getLogger(SparePartServiceImpl.class);
 
     @Override
-    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {
+    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
         Optional<SparePart> existingPart = sparePartRepo.findByPartNumberAndManufacturer(partNumber, manufacturer);
         if (existingPart.isPresent()) {
             throw new BadRequestException("Part with part number " + partNumber + " already exists for manufacturer " + manufacturer);
@@ -151,6 +151,7 @@ public class SparePartServiceImpl implements SparePartService {
                             .partName(projection.getPartName())
                             .manufacturer(projection.getManufacturer())
                             .price(projection.getPrice())
+                            .partNumber(projection.getPartNumber())
                             .photo(base64Photos)
                             .build();
                 })
@@ -166,7 +167,7 @@ public class SparePartServiceImpl implements SparePartService {
 
 
     @Override
-    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String make, String vendor) {
+    public SparePartDto updatePart(Integer id, String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
         SparePart sparePart = sparePartRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Spare part not found"));
 

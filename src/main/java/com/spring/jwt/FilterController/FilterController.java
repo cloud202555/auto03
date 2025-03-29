@@ -1,8 +1,10 @@
 package com.spring.jwt.FilterController;
 
+import com.spring.jwt.SparePart.SpareFilterDto;
 import com.spring.jwt.SparePart.SparePartDto;
-import com.spring.jwt.SparePart.SparePartService;
+import com.spring.jwt.SparePart.SparePartRepo;
 import com.spring.jwt.exception.PageNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,5 +41,8 @@ public class FilterController {
         }
     }
 
-
+    @GetMapping("/search")
+    public List<SpareFilterDto> searchSpareParts(@RequestParam String keyword) {
+        return filterService.searchSpareParts(keyword, 40);
+    }
 }

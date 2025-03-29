@@ -18,42 +18,6 @@ public class PdfGenerateController {
 
     private final PdfGenerationService pdfGenerationService;
 
-    /**
-     * Endpoint to generate the invoice PDF from a JSON body.
-     * The JSON should match the structure of PdfRequest, e.g.:
-     *
-     * {
-     *   "vehicleRegId": 123,
-     *   "invoiceNumber": "INV-001",
-     *   "jobcardNo": "JC-456",
-     *   "jobcardDate": "01-12-2023",
-     *   "kmsDriven": "35000",
-     *   "slogan": "Quality Service",
-     *   "comments": "Check brake pads also",
-     *   "parts": [
-     *     {
-     *       "partName": "Clutch Set",
-     *       "quantity": 1,
-     *       "unitPrice": 2736.00,
-     *       "discountPercent": 5.0,
-     *       "cgstPercent": 9.0,
-     *       "sgstPercent": 9.0,
-     *       "igstPercent": 0.0
-     *     }
-     *   ],
-     *   "labours": [
-     *     {
-     *       "description": "Gear Box Repair",
-     *       "quantity": 1,
-     *       "unitPrice": 300.00,
-     *       "discountPercent": 0.0,
-     *       "cgstPercent": 9.0,
-     *       "sgstPercent": 9.0,
-     *       "igstPercent": 0.0
-     *     }
-     *   ]
-     * }
-     */
     @PostMapping("/generate")
     @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<byte[]> generatePdf(@RequestBody PdfRequest request) {

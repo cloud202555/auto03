@@ -105,6 +105,7 @@ public class AppConfig {
                 .requestMatchers("/emailVerification/**").permitAll()
                 .requestMatchers("/appointments/**").permitAll()
                 .requestMatchers("/vehicle-reg/**").permitAll()
+                .requestMatchers("/api/invoices/**").permitAll()
                 .requestMatchers("/sparePartManagement/**").permitAll()
                 .requestMatchers("/sparePartTransactions/**").permitAll()
                 .requestMatchers("/save-part/**").permitAll()

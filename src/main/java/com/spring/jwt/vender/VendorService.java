@@ -14,4 +14,6 @@ public interface VendorService {
      ResponseEntity<List<VendorDto>> getAllVendors();
 
      ResponseEntity<VendorDto> UpdateVendor(Integer vendorId, VendorDto vendorDto);
+
+     void deleteVendorById(Integer vendorId);
 }
