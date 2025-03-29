@@ -131,7 +131,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
     public SparePartTransactionDto createTransaction(CreateSparePartTransactionDto transactionDto) {
 
         // Validate Transaction Type
-        if (transactionDto.getTransactionType() != TransactionType.CREDIT && transactionDto.getTransactionType() != TransactionType.DEBIT) {
+        if (transactionDto.getTransactionType() != TransactionType.CREDIT &&
+                transactionDto.getTransactionType() != TransactionType.DEBIT) {
             throw new IllegalArgumentException("Invalid transaction type! Allowed values: CREDIT or DEBIT.");
         }
 
@@ -149,31 +150,27 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             }
         }
 
-        // Fetch Spare Part
-        SparePart sparePart = sparePartRepository.findByPartNumberAndManufacturer(transactionDto.getPartNumber(), transactionDto.getManufacturer())
+        SparePart sparePart = sparePartRepository.findByPartNumberAndManufacturer(
+                        transactionDto.getPartNumber(), transactionDto.getManufacturer())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
 
-        // Ensure Spare Part has a valid price
         if (sparePart.getPrice() == null || sparePart.getPrice() <= 0) {
             throw new IllegalArgumentException("Invalid price for spare part: " + sparePart.getPartNumber());
         }
 
-        // Fetch UserPart or create new if not exists
-        UserPart userPart = userPartRepository.findByPartNumber(sparePart.getPartNumber())
+        UserPart userPart = userPartRepository.findByPartNumberAndManufacturer(sparePart.getPartNumber(), sparePart.getManufacturer())
                 .orElseGet(() -> {
                     UserPart newUserPart = new UserPart();
                     newUserPart.setPartNumber(sparePart.getPartNumber());
-                    newUserPart.setQuantity(0); // Default quantity
+                    newUserPart.setQuantity(0);
                     return userPartRepository.save(newUserPart);
                 });
 
-        // CREDIT Transaction: Ensure bill number is provided
         if (transactionDto.getTransactionType() == TransactionType.CREDIT &&
                 (transactionDto.getBillNo() == null || transactionDto.getBillNo().trim().isEmpty())) {
             throw new IllegalArgumentException("Bill number is required for CREDIT transactions.");
         }
 
-        // Handle DEBIT transaction stock check and update
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
             if (transactionDto.getQuantity() <= 0) {
                 throw new IllegalArgumentException("For DEBIT transactions, quantity must be greater than 0.");
@@ -186,26 +183,32 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             userPart.setQuantity(userPart.getQuantity() - transactionDto.getQuantity());
         }
 
-        // Handle CREDIT transaction stock update
         if (transactionDto.getTransactionType() == TransactionType.CREDIT) {
             userPart.setQuantity(userPart.getQuantity() + transactionDto.getQuantity());
         }
 
-        userPartRepository.save(userPart); // Save updated stock
-
-        // Calculate GST and Final Price
-//        int cgstValue = Optional.ofNullable(sparePart.getCGST()).orElse(0);
-//        int sgstValue = Optional.ofNullable(sparePart.getSGST()).orElse(0);
-
+        userPartRepository.save(userPart);
         int cgstValue = sparePart.getCGST() != null ? sparePart.getCGST() : 0;
         int sgstValue = sparePart.getSGST() != null ? sparePart.getSGST() : 0;
 
-        double cgstAmount = (sparePart.getPrice() * cgstValue) / 100.0;
-        double sgstAmount = (sparePart.getPrice() * sgstValue) / 100.0;
-        double totalGST = cgstAmount + sgstAmount;
-        double finalPrice = sparePart.getPrice() + totalGST;
+        double cgstAmount;
+        double sgstAmount;
+        double totalGST;
+        double finalPrice;
 
-// Save Transaction
+        if (transactionDto.getTransactionType() == TransactionType.CREDIT) {
+            cgstAmount = (sparePart.getPrice() * cgstValue) / 100.0;
+            sgstAmount = (sparePart.getPrice() * sgstValue) / 100.0;
+            totalGST = cgstAmount + sgstAmount;
+            finalPrice = sparePart.getPrice() + totalGST;
+        } else {
+            cgstAmount = 0.0;
+            sgstAmount = 0.0;
+            totalGST = 0.0;
+            finalPrice = sparePart.getPrice();
+        }
+
+        // Save Transaction
         SparePartTransaction transaction = SparePartTransaction.builder()
                 .partNumber(sparePart.getPartNumber())
                 .sparePartId(sparePart.getSparePartId())
@@ -215,6 +218,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .price((long) finalPrice)
                 .qtyPrice((long) (finalPrice * transactionDto.getQuantity()))
                 .totalGST((int) totalGST)
+                .cGST(sparePart.getCGST())
+                .sGST(sparePart.getSGST())
                 .updateAt(LocalDate.from(LocalDateTime.now()))
                 .transactionType(transactionDto.getTransactionType())
                 .quantity(transactionDto.getQuantity())
@@ -226,7 +231,6 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .build();
 
         transaction = transactionRepository.save(transaction);
-
 
         return toDto(transaction);
     }
@@ -450,6 +454,8 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 .manufacturer(transaction.getManufacturer())
                 .vehicleRegId(transaction.getVehicleRegId())
                 .price(transaction.getPrice())
+                .cGST(transaction.getCGST())
+                .sGST(transaction.getSGST())
                 .qtyPrice(transaction.getQtyPrice())
                 .updateAt(transaction.getUpdateAt())
                 .transactionType(transaction.getTransactionType())

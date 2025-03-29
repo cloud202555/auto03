@@ -1,5 +1,7 @@
 package com.spring.jwt.SparePart;
 
+import com.spring.jwt.SparePartTransaction.CreateSparePartTransactionDto;
+import com.spring.jwt.SparePartTransaction.SparePartTransactionDto;
 import com.spring.jwt.utils.BaseResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -94,6 +94,8 @@ public class VehicleReg {
     @Column
     private Integer userId;
 
+    private String email;
+
     @Column
     private String vehicleInspection;
 
@@ -146,5 +148,6 @@ public class VehicleReg {
         this.status = vehicleRegDto.getStatus();
         this.userId = vehicleRegDto.getUserId();
         this.date = vehicleRegDto.getDate();
+        this.email=vehicleRegDto.getEmail();
     }
 }

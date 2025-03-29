@@ -20,6 +20,8 @@ public class VehicleRegDto {
     private String numberPlateColour;
     private Integer kmsDriven;
 
+    private String email;
+
     private Integer ManufactureYear;
 
     private Integer advancePayment;
@@ -76,5 +78,6 @@ public class VehicleRegDto {
         this.status = vehicleReg.getStatus();
         this.userId = vehicleReg.getUserId();
         this.date = vehicleReg.getDate();
+        this.email=vehicleReg.getEmail();
     }
 }

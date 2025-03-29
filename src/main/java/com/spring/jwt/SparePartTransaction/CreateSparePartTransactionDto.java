@@ -15,6 +15,8 @@ public class CreateSparePartTransactionDto {
     private Integer userId;
     private String billNo;
     private Integer vehicleRegId;
+    private Integer cGST;
+    private Integer sGST;
     private String customerName;
     private String name;
 }

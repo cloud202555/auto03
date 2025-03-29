@@ -15,7 +15,7 @@ public interface VehicleRegService {
 
     void deleteVehicleReg(Integer vehicleRegId);
 
-    List<VehicleRegDto> getByStatus(String status);
+    public List<VehicleRegDto> getByStatus(String status);
 
     public List<VehicleRegDto> getByDateRange(String startDate, String endDate);
 

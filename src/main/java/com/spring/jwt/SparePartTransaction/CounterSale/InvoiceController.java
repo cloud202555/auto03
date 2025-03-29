@@ -31,4 +31,15 @@ public class InvoiceController {
     public ResponseEntity<List<Invoice>> getAllInvoices() {
         return ResponseEntity.ok(invoiceService.getAllInvoices());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Invoice> getInvoiceById(@PathVariable Long id) {
+        Invoice invoice = invoiceService.getInvoiceById(id);
+        if (invoice != null) {
+            return ResponseEntity.ok(invoice);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
