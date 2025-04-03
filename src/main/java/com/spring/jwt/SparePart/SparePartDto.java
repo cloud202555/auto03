@@ -45,5 +45,5 @@ public class SparePartDto {
 
     private Integer buyingPrice;
 
-
+    private String vendor;
 }
