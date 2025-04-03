@@ -1,9 +1,8 @@
 package com.spring.jwt.UserParts;
 
-import jakarta.persistence.Column;
 import lombok.*;
+
 import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter

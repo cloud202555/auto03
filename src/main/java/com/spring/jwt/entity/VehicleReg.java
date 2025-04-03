@@ -44,8 +44,13 @@ public class VehicleReg {
     @Column
     private Integer kmsDriven;
 
+    // FuelType
     @Column(length = 45)
     private String vehicleVariant;
+
+    private Integer manufactureYear;
+
+    private Integer advancePayment;
 
     @Column(length = 45)
     private String engineNumber;
@@ -89,6 +94,8 @@ public class VehicleReg {
     @Column
     private Integer userId;
 
+    private String email;
+
     @Column
     private String vehicleInspection;
 
@@ -128,6 +135,8 @@ public class VehicleReg {
         this.chasisNumber = vehicleRegDto.getChasisNumber();
         this.numberPlateColour = vehicleRegDto.getNumberPlateColour();
         this.customerId = vehicleRegDto.getCustomerId();
+        this.advancePayment =vehicleRegDto.getAdvancePayment();
+        this.manufactureYear =vehicleRegDto.getManufactureYear();
         this.customerName = vehicleRegDto.getCustomerName();
         this.customerAddress = vehicleRegDto.getCustomerAddress();
         this.customerMobileNumber = vehicleRegDto.getCustomerMobileNumber();
@@ -139,5 +148,6 @@ public class VehicleReg {
         this.status = vehicleRegDto.getStatus();
         this.userId = vehicleRegDto.getUserId();
         this.date = vehicleRegDto.getDate();
+        this.email=vehicleRegDto.getEmail();
     }
 }

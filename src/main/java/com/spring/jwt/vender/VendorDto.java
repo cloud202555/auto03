@@ -14,5 +14,9 @@ public class VendorDto {
     private String GSTno;
 
     private String address;
+
+    private Long mobileNumber;
+
+    private String panNo;
 }
 

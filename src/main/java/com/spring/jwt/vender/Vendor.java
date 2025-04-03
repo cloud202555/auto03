@@ -28,5 +28,11 @@ public class Vendor {
     private String GSTno;
 
     @Column
+    private Long mobileNumber;
+
+    @Column
+    private String panNo;
+
+    @Column
     private String address;
 }

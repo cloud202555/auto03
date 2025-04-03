@@ -106,7 +106,7 @@ public class PdfGenerationService {
         PdfPTable custVehTable = new PdfPTable(2);
         custVehTable.setWidthPercentage(100);
         custVehTable.setWidths(new float[]{50f, 50f});
-        custVehTable.setSpacingBefore(0f); // No extra space
+        custVehTable.setSpacingBefore(0f);
         custVehTable.setHeaderRows(1);
 
         PdfPCell customerHeader = new PdfPCell(new Phrase("CUSTOMER DETAILS",

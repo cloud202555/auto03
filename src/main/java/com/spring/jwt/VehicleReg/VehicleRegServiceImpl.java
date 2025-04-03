@@ -2,8 +2,13 @@ package com.spring.jwt.VehicleReg;
 
 import com.spring.jwt.Appointment.AppointmentRepository;
 import com.spring.jwt.entity.Appointment;
+import com.spring.jwt.entity.Role;
+import com.spring.jwt.entity.User;
 import com.spring.jwt.entity.VehicleReg;
+import com.spring.jwt.repository.RoleRepository;
+import com.spring.jwt.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -11,11 +16,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.lang.reflect.Field;
-import java.util.Map;
 
 import org.springframework.util.ReflectionUtils;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,15 @@ public class VehicleRegServiceImpl implements VehicleRegService {
 
     @Autowired
     private VehicleRegRepository vehicleRegRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private AppointmentRepository appointmentRepository;
 
@@ -45,6 +57,25 @@ public class VehicleRegServiceImpl implements VehicleRegService {
 
         VehicleReg vehicleReg = new VehicleReg();
         copyDtoToEntity(vehicleRegDto, vehicleReg);
+        User user = userRepository.findByEmail(vehicleRegDto.getEmail());
+
+        if (user == null) {
+            user = new User();
+            user.setEmail(vehicleRegDto.getEmail());
+            user.setAddress(vehicleRegDto.getCustomerAddress());
+            user.setMobileNumber(Long.valueOf(vehicleRegDto.getCustomerMobileNumber()));
+            user.setFirstName(vehicleRegDto.getCustomerName());
+            user.setPassword(passwordEncoder.encode("*#Aht%43fcc"));
+            Role defaultRole = roleRepository.findByName("USER");
+            if (defaultRole == null) {
+                defaultRole = new Role("USER");
+                defaultRole = roleRepository.save(defaultRole);
+            }
+            user.setRoles(new HashSet<>(Arrays.asList(defaultRole)));
+
+            userRepository.save(user);
+        }
+        vehicleReg.setUserId(user.getId());
         vehicleReg = vehicleRegRepository.save(vehicleReg);
         return new VehicleRegDto(vehicleReg);
     }
@@ -54,7 +85,6 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         VehicleReg vehicleReg = vehicleRegRepository.findById(vehicleRegId)
                 .orElseThrow(() -> new RuntimeException("VehicleReg not found"));
 
-        // Check and update only non-null fields
         if (vehicleRegDto.getVehicleNumber() != null) {
             vehicleReg.setVehicleNumber(vehicleRegDto.getVehicleNumber());
         }
@@ -63,6 +93,15 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         }
         if (vehicleRegDto.getVehicleModelName() != null) {
             vehicleReg.setVehicleModelName(vehicleRegDto.getVehicleModelName());
+        }
+        if (vehicleRegDto.getManufactureYear() != null) {
+            vehicleReg.setManufactureYear(vehicleRegDto.getManufactureYear());
+        }
+        if (vehicleRegDto.getEmail() != null) {
+            vehicleReg.setEmail(vehicleRegDto.getEmail());
+        }
+        if (vehicleRegDto.getAdvancePayment() != null) {
+            vehicleReg.setAdvancePayment(vehicleRegDto.getAdvancePayment());
         }
         if (vehicleRegDto.getVehicleVariant() != null) {
             vehicleReg.setVehicleVariant(vehicleRegDto.getVehicleVariant());
@@ -145,15 +184,23 @@ public class VehicleRegServiceImpl implements VehicleRegService {
 
     @Override
     public List<VehicleRegDto> getByStatus(String status) {
-        List<VehicleReg> vehicleRegs = vehicleRegRepository.findByStatus(status);
+        // Split the incoming status string, trim, lowercase, and remove inner spaces
+        List<String> statusList = Arrays.stream(status.split(","))
+                .map(s -> s.trim().toLowerCase().replaceAll("\\s+", ""))
+                .collect(Collectors.toList());
+
+        List<VehicleReg> vehicleRegs = vehicleRegRepository.findByNormalizedStatusIn(statusList);
 
         if (vehicleRegs.isEmpty()) {
             throw new RuntimeException("No vehicle registrations found with status: " + status);
         }
+
         return vehicleRegs.stream()
                 .map(VehicleRegDto::new)
                 .collect(Collectors.toList());
     }
+
+
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD");
 
@@ -193,7 +240,10 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         vehicleReg.setEngineNumber(vehicleRegDto.getEngineNumber());
         vehicleReg.setChasisNumber(vehicleRegDto.getChasisNumber());
         vehicleReg.setNumberPlateColour(vehicleRegDto.getNumberPlateColour());
+        vehicleReg.setManufactureYear(vehicleRegDto.getManufactureYear());
+        vehicleReg.setAdvancePayment(vehicleRegDto.getAdvancePayment());
 
+        vehicleReg.setEmail(vehicleRegDto.getEmail());
         vehicleReg.setCustomerId(vehicleRegDto.getCustomerId());
         vehicleReg.setCustomerName(vehicleRegDto.getCustomerName());
         vehicleReg.setCustomerAddress(vehicleRegDto.getCustomerAddress());

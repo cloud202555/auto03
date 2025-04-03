@@ -1,14 +1,9 @@
 package com.spring.jwt.UserParts;
 
-import com.spring.jwt.FilterController.SparePartAllDto;
+
 import com.spring.jwt.SparePart.PaginatedResponse;
-import com.spring.jwt.SparePart.SparePartDto;
-import com.spring.jwt.exception.PageNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/userParts")

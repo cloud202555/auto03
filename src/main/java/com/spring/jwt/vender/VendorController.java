@@ -38,4 +38,10 @@ public class VendorController {
         return vendorService.UpdateVendor(vendorId, vendorDto);
     }
 
+    @DeleteMapping("delete/{vendorId}")
+    public ResponseEntity<BaseResponseDTO> deleteVendor(@PathVariable Integer vendorId) {
+        vendorService.deleteVendorById(vendorId);
+        BaseResponseDTO response = new BaseResponseDTO("200", "Vendor deleted successfully");
+        return ResponseEntity.ok(response);
+    }
 }

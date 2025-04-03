@@ -37,4 +37,5 @@ public interface UserPartRepository extends JpaRepository<UserPart, Integer> {
     @Query("SELECT u.quantity FROM UserPart u WHERE u.partNumber = :partNumber")
     Optional<Integer> findQuantityByPartNumber(@Param("partNumber") String partNumber);
 
+    Optional<UserPart> findByPartNumberAndManufacturer(String partNumber, String manufacturer);
 }

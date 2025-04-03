@@ -23,4 +23,8 @@ public interface VehicleRegRepository extends JpaRepository<VehicleReg, Integer>
 
     Optional<VehicleReg> findUserIdByVehicleRegId(Integer vehicleRegId);
 
-}
+        @Query("SELECT v FROM VehicleReg v WHERE LOWER(REPLACE(v.status, ' ', '')) IN :statuses")
+        List<VehicleReg> findByNormalizedStatusIn(@Param("statuses") List<String> statuses);
+    }
+
+
