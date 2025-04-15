@@ -151,7 +151,7 @@ public class UserController {
     }
     )
 
-    @GetMapping("/getAllUsers")
+        @GetMapping("/getAllUsers")
     public ResponseEntity<ResponseAllUsersDto> getAllUsers(@RequestParam(defaultValue= "0") int pageNo, @RequestParam(defaultValue= "10") int pageSize) {
         try {
             Page<UserDTO> userPage = userService.getAllUsers(pageNo, pageSize);

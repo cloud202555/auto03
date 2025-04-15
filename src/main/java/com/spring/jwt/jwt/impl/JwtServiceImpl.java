@@ -100,8 +100,6 @@ public class JwtServiceImpl implements JwtService {
                 .compact();
     }
 
-
-
     @Override
     public boolean isValidToken(String token) {
         final String username = extractUsername(token);

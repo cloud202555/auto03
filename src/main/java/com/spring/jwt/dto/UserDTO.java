@@ -42,6 +42,10 @@ public class UserDTO {
     )
     private Long mobileNumber;
 
+    private Integer adharNo;
+
+    private String gSTINNo;
+
     @Schema(
             description = "Role of the User", example = "USER"
     )
@@ -53,6 +57,8 @@ public class UserDTO {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.mobileNumber = user.getMobileNumber();
+        this.adharNo = user.getAdharNo();
+        this.gSTINNo = user.getGSTINNo();
     }
 
 }

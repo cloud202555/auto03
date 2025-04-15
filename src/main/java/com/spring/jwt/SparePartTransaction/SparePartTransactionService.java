@@ -1,5 +1,6 @@
 package com.spring.jwt.SparePartTransaction;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,4 +30,7 @@ public interface SparePartTransactionService {
     List<SparePartTransactionDto> getByTransactionTypeAndNameAndDateRange(TransactionType transactionType, String name, LocalDateTime startDate, LocalDateTime endDate);
 
     List<SparePartTransactionDto> getByNameOrPartNumber(String name, String partNumber);
-}
+
+    public List<SparePartTransactionDto> getCreditTransactionsByDateRange ( TransactionType transactionType, LocalDateTime startDate, LocalDateTime endDate);
+
+   }

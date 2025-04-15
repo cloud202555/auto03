@@ -40,10 +40,6 @@ public class UserPart {
     @Column(name = "update_At")
     private LocalDate updateAt;
 
-    @ElementCollection
-    @Column(name = "photo", columnDefinition = "LONGBLOB")
-    private List<byte[]> photo;
-
     @Column(name = "part_number", nullable = false)
     private String partNumber;
 

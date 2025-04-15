@@ -184,7 +184,6 @@ public class VehicleRegServiceImpl implements VehicleRegService {
 
     @Override
     public List<VehicleRegDto> getByStatus(String status) {
-        // Split the incoming status string, trim, lowercase, and remove inner spaces
         List<String> statusList = Arrays.stream(status.split(","))
                 .map(s -> s.trim().toLowerCase().replaceAll("\\s+", ""))
                 .collect(Collectors.toList());
@@ -261,6 +260,45 @@ public class VehicleRegServiceImpl implements VehicleRegService {
         vehicleReg.setStatus(vehicleRegDto.getStatus());
         vehicleReg.setUserId(vehicleRegDto.getUserId());
         vehicleReg.setDate(vehicleRegDto.getDate());
+    }
+
+    @Override
+    public List<VehicleRegDto> searchVehicles(String query) {
+        List<VehicleReg> bySearchQuery = vehicleRegRepository.findBySearchQuery(query);
+        return bySearchQuery.stream()
+                .map(VehicleRegDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VehicleRegDto> getVehicleRegByVehicleNumber(String vehicleNumber) {
+        List<VehicleReg> vehicleRegs = vehicleRegRepository.findByVehicleNumber(vehicleNumber);
+        if (vehicleRegs == null || vehicleRegs.isEmpty()) {
+            throw new RuntimeException("Vehicle not found with number: " + vehicleNumber);
+        }
+
+        return vehicleRegs.stream()
+                .map(VehicleRegDto::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public VehicleRegDetailsDto getVehicleDetailsByNumber(String vehicleNumber) {
+        return vehicleRegRepository.findTopByVehicleNumber(vehicleNumber);
+    }
+
+    public List<VehicleRegDto> getExpiredInsurances() {
+        return vehicleRegRepository.findByInsuredToBefore(LocalDate.now())
+                .stream()
+                .map(VehicleRegDto::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<VehicleRegDto> getActiveInsurances() {
+        return vehicleRegRepository.findByInsuredToGreaterThanEqual(LocalDate.now())
+                .stream()
+                .map(VehicleRegDto::new)
+                .collect(Collectors.toList());
     }
 
 }

@@ -28,7 +28,7 @@ public interface UserPartRepository extends JpaRepository<UserPart, Integer> {
     void deleteBySparePart(SparePart sparePart);
 
     @Query("select u.userPartId as userPartId, u.partNumber as partNumber, u.partName as partName, " +
-            "u.manufacturer as manufacturer, u.quantity as quantity, u.price as price,u.description as description, u.updateAt as updateAt " +
+            "u.manufacturer as manufacturer,u.buyingPrice as buyingPrice, u.quantity as quantity, u.price as price,u.description as description, u.updateAt as updateAt " +
             "from UserPart u")
     Page<UserPartProjection> findAllProjected(Pageable pageable);
 

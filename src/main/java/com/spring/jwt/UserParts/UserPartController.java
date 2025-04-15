@@ -43,5 +43,14 @@ public class UserPartController {
         return ResponseEntity.ok(quantity);
     }
 
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateUserPartAndSparePart(@RequestBody UpdateUserPartRequestDTO request) {
+        try {
+            UserPartDto updatedUserPart = userPartService.updateUserPartAndSparePart(request);
+            return ResponseEntity.ok(updatedUserPart);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Update failed: " + e.getMessage());
+        }
+    }
 }
 

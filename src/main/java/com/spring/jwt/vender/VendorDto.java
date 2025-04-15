@@ -18,5 +18,7 @@ public class VendorDto {
     private Long mobileNumber;
 
     private String panNo;
+
+    private String SpareBrand;
 }
 

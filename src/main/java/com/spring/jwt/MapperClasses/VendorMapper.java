@@ -13,6 +13,7 @@ public class VendorMapper {
         vendor.setVendorId(vendorDto.getVendorId());
         vendor.setName(vendorDto.getName());
         vendor.setAddress(vendorDto.getAddress());
+        vendor.setSpareBrand(vendorDto.getSpareBrand());
         vendor.setGSTno(vendorDto.getGSTno());
         vendor.setMobileNumber(vendorDto.getMobileNumber());
         vendor.setPanNo(vendorDto.getPanNo());
@@ -24,6 +25,7 @@ public class VendorMapper {
         vendorDto.setVendorId(vendor.getVendorId());
         vendorDto.setName(vendor.getName());
         vendorDto.setAddress(vendor.getAddress());
+        vendorDto.setSpareBrand(vendor.getSpareBrand());
         vendorDto.setGSTno(vendor.getGSTno());
         vendorDto.setMobileNumber(vendor.getMobileNumber());
         vendorDto.setPanNo(vendor.getPanNo());
