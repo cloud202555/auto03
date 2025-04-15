@@ -124,6 +124,8 @@ public class AppConfig {
                 .requestMatchers("/serviceUsed/**").permitAll()
                 .requestMatchers("/api/v1/customer/**").permitAll()
                 .requestMatchers("/api/vehicle-invoices/**").permitAll()
+                .requestMatchers("/manageNotes/**").permitAll()
+                .requestMatchers("/manageTerms/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .authenticationManager(manager)
