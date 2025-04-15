@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,12 +22,12 @@ public class VendorServiceImpl implements VendorService{
 
     @Override
     public BaseResponseDTO register(VendorDto vendorDto) {
-
-        if (vendorRepository.existsByName(vendorDto.getName())) {
-            throw new DataIntegrityViolationException("A vendor with the same Name already exists. Please use a different value." +
-                    vendorDto.getName());
+        Optional<Vendor> byPanNo = vendorRepository.findByPanNo(vendorDto.getPanNo());
+        if (!byPanNo.isEmpty()) {
+            throw new DataIntegrityViolationException("A vendor with the same Pan Number already exists. Please use a different value." +
+                    vendorDto.getPanNo());
         }
-        Vendor save = vendorRepository.save(vendorMapper.toEntity(vendorDto));
+        vendorRepository.save(vendorMapper.toEntity(vendorDto));
         return new BaseResponseDTO("201","Vendor registered successfully");
     }
 
@@ -60,6 +61,9 @@ public class VendorServiceImpl implements VendorService{
         }
         if (vendorDto.getAddress() != null) {
             vendor.setAddress(vendorDto.getAddress());
+        }
+        if (vendorDto.getSpareBrand() != null) {
+            vendor.setSpareBrand(vendorDto.getSpareBrand());
         }
         if (vendorDto.getMobileNumber() != null) {
             vendor.setMobileNumber(vendorDto.getMobileNumber());

@@ -35,4 +35,7 @@ public class Vendor {
 
     @Column
     private String address;
+
+    @Column
+    private String SpareBrand;
 }

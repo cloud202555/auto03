@@ -13,7 +13,7 @@ public class InvoiceController {
     private InvoiceService invoiceService;
 
     @Autowired
-    private InvoiceRepository invoiceRepository; // To generate invoice number based on count
+    private InvoiceRepository invoiceRepository;
 
     @PostMapping("AddInvoice")
     public ResponseEntity<Invoice> createInvoice(@RequestBody Invoice invoice) {
@@ -41,5 +41,11 @@ public class InvoiceController {
             return ResponseEntity.notFound().build();
         }
     }
-
+    @GetMapping("/dateRange")
+    public ResponseEntity<List<Invoice>> getInvoicesByDateRange(
+            @RequestParam("from") String fromDate,
+            @RequestParam("to") String toDate) {
+        List<Invoice> invoices = invoiceService.getInvoicesByDateRange(fromDate, toDate);
+        return ResponseEntity.ok(invoices);
+    }
 }

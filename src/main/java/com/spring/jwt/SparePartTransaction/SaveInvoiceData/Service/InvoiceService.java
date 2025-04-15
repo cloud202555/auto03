@@ -4,9 +4,9 @@
 //import com.spring.jwt.SparePartTransaction.Pdf.PartDto;
 //import com.spring.jwt.SparePartTransaction.Pdf.LabourDto;
 //import com.spring.jwt.SparePartTransaction.Pdf.PdfRequest;
-//import com.spring.jwt.SparePartTransaction.SaveInvoiceData.Invoice;
 //import com.spring.jwt.SparePartTransaction.SaveInvoiceData.InvoiceLabourLine;
 //import com.spring.jwt.SparePartTransaction.SaveInvoiceData.InvoicePartLine;
+//import com.spring.jwt.SparePartTransaction.SaveInvoiceData.Quotation;
 //import com.spring.jwt.SparePartTransaction.SaveInvoiceData.Repository.InvoiceRepository;
 //import com.spring.jwt.VehicleReg.VehicleRegRepository;
 //import com.spring.jwt.entity.VehicleReg;
@@ -26,46 +26,34 @@
 //    private final InvoiceRepository invoiceRepository;
 //    private final CounterService counterService;
 //
-//    public Invoice saveInvoice(PdfRequest request) {
-//        // 1) Fetch the VehicleReg from DB
+//    public Quotation saveInvoice(QuotationRequest request) {
+//
 //        VehicleReg vehicle = vehicleRegRepository.findById(request.getVehicleRegId())
 //                .orElseThrow(() -> new RuntimeException("VehicleReg not found with ID: " + request.getVehicleRegId()));
 //
-//        // 2) Generate invoice number, jobcardNo if needed
-//        String invoiceNumber = request.getInvoiceNumber();
-//        if (invoiceNumber == null || invoiceNumber.trim().isEmpty()) {
-//            invoiceNumber = String.valueOf(counterService.getNextCounter("invoice", 1000));
-//            request.setInvoiceNumber(invoiceNumber);
-//        }
-//        String jobcardNo = request.getJobcardNo();
-//        if (jobcardNo == null || jobcardNo.trim().isEmpty()) {
-//            jobcardNo = String.valueOf(counterService.getNextCounter("jobCard", 100));
-//            request.setJobcardNo(jobcardNo);
+//        String quotationNumber = request.getQuotationNumber();
+//        if (quotationNumber == null || quotationNumber.trim().isEmpty()) {
+//            quotationNumber = String.valueOf(counterService.getNextCounter("quotation", 1));
+//            request.getQuotationNumber(quotationNumber);
 //        }
 //
-//        // 3) Prepare the Invoice entity (header)
-//        Invoice invoice = new Invoice();
-//        invoice.setInvoiceNumber(invoiceNumber);
+//        Quotation quotation = new Quotation();
+//        quotation.setQuotationNumber(quotationNumber);
 //
-//        // If the VehicleReg date is not null, use that; otherwise current date
 //        LocalDate invDate = (vehicle.getDate() != null) ? vehicle.getDate() : LocalDate.now();
-//        invoice.setInvoiceDate(invDate);
+//        quotation.setInvoiceDate(invDate);
 //
-//        invoice.setJobcardNo(jobcardNo);
+//        quotation.setCustomerName(vehicle.getCustomerName());
+//        quotation.setCustomerAddress(vehicle.getCustomerAddress());
+//        quotation.setCustomerMobile(vehicle.getCustomerMobileNumber());
+//        quotation.setVehicleNumber(vehicle.getVehicleNumber());
+//        quotation.setEngineNumber(vehicle.getEngineNumber());
+//        quotation.setKmsDriven(vehicle.getKmsDriven());
+//        quotation.setVehicleBrand(vehicle.getVehicleBrand());
+//        quotation.setVehicleModelName(vehicle.getVehicleModelName());
 //
-//        // Set customer/vehicle fields
-//        invoice.setCustomerName(vehicle.getCustomerName());
-//        invoice.setCustomerAddress(vehicle.getCustomerAddress());
-//        invoice.setCustomerMobile(vehicle.getCustomerMobileNumber());
-//        invoice.setVehicleNumber(vehicle.getVehicleNumber());
-//        invoice.setEngineNumber(vehicle.getEngineNumber());
-//        invoice.setKmsDriven(vehicle.getKmsDriven());
-//        invoice.setVehicleBrand(vehicle.getVehicleBrand());
-//        invoice.setVehicleModelName(vehicle.getVehicleModelName());
+//        quotation.setComments(request.getComments());
 //
-//        invoice.setComments(request.getComments());
-//
-//        // 4) Calculate spares line items
 //        double sparesSubTotal = 0.0;
 //        List<InvoicePartLine> partLines = new ArrayList<>();
 //        int sNo = 1;
@@ -73,7 +61,7 @@
 //        if (request.getParts() != null) {
 //            for (PartDto partDto : request.getParts()) {
 //                InvoicePartLine partLine = new InvoicePartLine();
-//                partLine.setInvoice(invoice);
+//                partLine.setQuotation(quotation);
 //                partLine.setLineNo(sNo++);
 //                partLine.setPartName(partDto.getPartName());
 //                partLine.setQuantity(partDto.getQuantity());
@@ -105,24 +93,22 @@
 //            }
 //        }
 //
-//        invoice.setPartLines(partLines);
-//        invoice.setSparesSubTotal(sparesSubTotal);
+//        quotation.setPartLines(partLines);
+//        quotation.setSparesSubTotal(sparesSubTotal);
 //
-//        // 5) Calculate labour line items
 //        double labourSubTotal = 0.0;
 //        List<InvoiceLabourLine> labourLines = new ArrayList<>();
-//        sNo = 1; // reset or continue from last
+//        sNo = 1;
 //
 //        if (request.getLabours() != null) {
 //            for (LabourDto labourDto : request.getLabours()) {
 //                InvoiceLabourLine labourLine = new InvoiceLabourLine();
-//                labourLine.setInvoice(invoice);
+//                labourLine.setInvoice(quotation);
 //                labourLine.setLineNo(sNo++);
 //                labourLine.setDescription(labourDto.getDescription());
 //                labourLine.setQuantity(labourDto.getQuantity());
 //                labourLine.setUnitPrice(labourDto.getUnitPrice());
 //
-//                // Perform calculations
 //                double totalPrice = labourDto.getQuantity() * labourDto.getUnitPrice();
 //                double discountAmt = totalPrice * (labourDto.getDiscountPercent() / 100.0);
 //                double taxableAmt = totalPrice - discountAmt;
@@ -131,7 +117,6 @@
 //                double igstAmt = taxableAmt * (labourDto.getIgstPercent() / 100.0);
 //                double finalAmount = taxableAmt + cgstAmt + sgstAmt + igstAmt;
 //
-//                // Set line columns
 //                labourLine.setDiscountPercent(labourDto.getDiscountPercent());
 //                labourLine.setDiscountAmt(discountAmt);
 //                labourLine.setTaxableAmt(taxableAmt);
@@ -148,8 +133,8 @@
 //            }
 //        }
 //
-//        invoice.setLabourLines(labourLines);
-//        invoice.setLabourSubTotal(labourSubTotal);
+//        quotation.setLabourLines(labourLines);
+//        quotation.setLabourSubTotal(labourSubTotal);
 //
 //        // 6) Final totals
 //        double grandTotal = sparesSubTotal + labourSubTotal;
@@ -163,16 +148,16 @@
 //            throw new IllegalArgumentException("Advance amount cannot exceed total amount.");
 //        }
 //
-//        invoice.setGrandTotal(grandTotal);
-//        invoice.setAdvanceAmount(advAmount);
-//        invoice.setNetAmount(netAmount);
+//        quotation.setGrandTotal(grandTotal);
+//        quotation.setAdvanceAmount(advAmount);
+//        quotation.setNetAmount(netAmount);
 //
 //        // Convert net amount to words (same logic as PDF)
 //        String amountInWords = convertNumberToWords((long) netAmount) + " only";
-//        invoice.setAmountInWords(amountInWords);
+//        quotation.setAmountInWords(amountInWords);
 //
-//        // 7) Save the invoice (this will cascade and save lines)
-//        return invoiceRepository.save(invoice);
+//        // 7) Save the quotation (this will cascade and save lines)
+//        return invoiceRepository.save(quotation);
 //    }
 //
 //    // Helper to convert number to words

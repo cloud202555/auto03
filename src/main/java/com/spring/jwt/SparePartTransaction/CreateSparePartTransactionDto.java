@@ -1,5 +1,6 @@
 package com.spring.jwt.SparePartTransaction;
 
+import jakarta.persistence.Column;
 import lombok.*;
 
 @Getter

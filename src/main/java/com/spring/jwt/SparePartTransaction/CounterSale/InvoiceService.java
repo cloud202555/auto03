@@ -7,5 +7,7 @@ public interface InvoiceService {
     List<Invoice> getAllInvoices();
 
     Invoice getInvoiceById(Long id);
+
+    List<Invoice> getInvoicesByDateRange(String fromDate, String toDate);
 }
 

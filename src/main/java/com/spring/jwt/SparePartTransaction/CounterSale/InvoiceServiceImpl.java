@@ -32,4 +32,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         Optional<Invoice> invoiceOpt = invoiceRepository.findById(id);
         return invoiceOpt.orElse(null);
     }
+    public List<Invoice> getInvoicesByDateRange(String fromDate, String toDate) {
+        return invoiceRepository.findByInvDateBetween(fromDate, toDate);
+    }
 }

@@ -44,6 +44,10 @@ public class User {
     @Column(name = "mobile_number")
     private Long mobileNumber;
 
+    private Integer adharNo;
+
+    private String gSTINNo;
+
     @Column(name = "password")
     private String password;
 

@@ -31,4 +31,6 @@ public class SparePartTransactionDto {
     private Integer cGST;
     private Integer sGST;
     private Integer totalGST;
+    private Integer invoiceNumber;
+    private Integer jobCardNumber;
 }
