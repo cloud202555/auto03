@@ -39,7 +39,7 @@ public class SparePartServiceImpl implements SparePartService {
     public static final Logger logger = LoggerFactory.getLogger(SparePartServiceImpl.class);
 
     @Override
-    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice) {
+    public BaseResponseDTO addPart(String partName, String description, String manufacturer, Long price, String partNumber, List<MultipartFile> photos,Integer sGST,Integer cGST,Integer totalGST,Integer buyingPrice,String vendor) {
         Optional<SparePart> existingPart = sparePartRepo.findByPartNumberAndManufacturer(partNumber, manufacturer);
         if (existingPart.isPresent()) {
             throw new BadRequestException("Part with part number " + partNumber + " already exists for manufacturer " + manufacturer);
@@ -66,6 +66,7 @@ public class SparePartServiceImpl implements SparePartService {
                     .updateAt(LocalDate.now())
                     .sGST(sGST)
                     .cGST(cGST)
+                    .vendor(vendor)
                     .buyingPrice(buyingPrice)
                     .totalGST(totalGST)
                     .build();
@@ -85,6 +86,7 @@ public class SparePartServiceImpl implements SparePartService {
                     .lastUpdate(LocalDate.now().toString())
                     .sGST(sGST)
                     .cGST(cGST)
+                    .vendor(vendor)
                     .buyingPrice(buyingPrice)
                     .totalGST(totalGST)
                     .build();
