@@ -36,6 +36,107 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
     @Autowired
     private VendorPartRepository vendorPartRepository;
 
+//    @Override
+//    @Transactional
+//    public SparePartTransactionDto createTransaction(CreateSparePartTransactionDto transactionDto) {
+//
+//        if (transactionDto.getTransactionType() != TransactionType.CREDIT &&
+//                transactionDto.getTransactionType() != TransactionType.DEBIT) {
+//            throw new IllegalArgumentException("Invalid transaction type! Allowed values: CREDIT or DEBIT.");
+//        }
+//
+//        Integer userId = transactionDto.getUserId();
+//
+//        if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
+//            if (userId == null && transactionDto.getVehicleRegId() != null) {
+//                userId = vehicleRegRepository.findUserIdByVehicleRegId(transactionDto.getVehicleRegId())
+//                        .map(VehicleReg::getUserId)
+//                        .orElseThrow(() -> new IllegalArgumentException("No user found for Vehicle Registration ID: " + transactionDto.getVehicleRegId()));
+//            }
+//            if (userId == null) {
+//                throw new IllegalArgumentException("Either userId or vehicleRegId must be provided for DEBIT transactions.");
+//            }
+//        }
+//
+//        SparePart sparePart = sparePartRepository.findByPartNumberAndManufacturer(
+//                        transactionDto.getPartNumber(), transactionDto.getManufacturer())
+//                .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
+//
+//        if (sparePart.getPrice() == null || sparePart.getPrice() <= 0) {
+//            throw new IllegalArgumentException("Invalid price for spare part: " + sparePart.getPartNumber());
+//        }
+//
+//        UserPart userPart = userPartRepository.findByPartNumberAndManufacturer(sparePart.getPartNumber(), sparePart.getManufacturer())
+//                .orElseGet(() -> {
+//                    UserPart newUserPart = new UserPart();
+//                    newUserPart.setPartNumber(sparePart.getPartNumber());
+//                    newUserPart.setQuantity(0);
+//                    return userPartRepository.save(newUserPart);
+//                });
+//
+//        if (transactionDto.getTransactionType() == TransactionType.CREDIT &&
+//                (transactionDto.getBillNo() == null || transactionDto.getBillNo().trim().isEmpty())) {
+//            throw new IllegalArgumentException("Bill number is required for CREDIT transactions.");
+//        }
+//
+//        if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
+//            if (transactionDto.getQuantity() <= 0) {
+//                throw new IllegalArgumentException("For DEBIT transactions, quantity must be greater than 0.");
+//            }
+//            if (userPart.getQuantity() < transactionDto.getQuantity()) {
+//                throw new IllegalArgumentException("Insufficient stock! Available: " + userPart.getQuantity() + ", Requested: " + transactionDto.getQuantity());
+//            }
+//            userPart.setQuantity(userPart.getQuantity() - transactionDto.getQuantity());
+//        }
+//        if (transactionDto.getTransactionType() == TransactionType.CREDIT) {
+//            userPart.setQuantity(userPart.getQuantity() + transactionDto.getQuantity());
+//        }
+//        userPartRepository.save(userPart);
+//        int cgstValue = sparePart.getCGST() != null ? sparePart.getCGST() : 0;
+//        int sgstValue = sparePart.getSGST() != null ? sparePart.getSGST() : 0;
+//
+//        double cgstAmount;
+//        double sgstAmount;
+//        double totalGST;
+//        double finalPrice;
+//
+//        if (transactionDto.getTransactionType() == TransactionType.CREDIT) {
+//            cgstAmount = (sparePart.getPrice() * cgstValue) / 100.0;
+//            sgstAmount = (sparePart.getPrice() * sgstValue) / 100.0;
+//            totalGST = cgstAmount + sgstAmount;
+//            finalPrice = sparePart.getPrice() + totalGST;
+//        } else {
+//            cgstAmount = 0.0;
+//            sgstAmount = 0.0;
+//            totalGST = 0.0;
+//            finalPrice = sparePart.getPrice();
+//        }
+//
+//        SparePartTransaction transaction = SparePartTransaction.builder()
+//                .partNumber(sparePart.getPartNumber())
+//                .sparePartId(sparePart.getSparePartId())
+//                .partName(sparePart.getPartName())
+//                .manufacturer(sparePart.getManufacturer())
+//                .customerName(transactionDto.getCustomerName())
+//                .price((long) finalPrice)
+//                .qtyPrice((long) (finalPrice * transactionDto.getQuantity()))
+//                .totalGST((int) totalGST)
+//                .cGST(sparePart.getCGST())
+//                .sGST(sparePart.getSGST())
+//                .updateAt(LocalDate.from(LocalDateTime.now()))
+//                .transactionType(transactionDto.getTransactionType())
+//                .quantity(transactionDto.getQuantity())
+//                .vehicleRegId(transactionDto.getTransactionType() == TransactionType.DEBIT ? transactionDto.getVehicleRegId() : null)
+//                .transactionDate(LocalDateTime.now())
+//                .userId(userId)
+//                .billNo(transactionDto.getBillNo())
+//                .name(transactionDto.getName())
+//                .build();
+//
+//        transaction = transactionRepository.save(transaction);
+//        return toDto(transaction);
+//    }
+
     @Override
     @Transactional
     public SparePartTransactionDto createTransaction(CreateSparePartTransactionDto transactionDto) {
@@ -44,6 +145,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 transactionDto.getTransactionType() != TransactionType.DEBIT) {
             throw new IllegalArgumentException("Invalid transaction type! Allowed values: CREDIT or DEBIT.");
         }
+
         Integer userId = transactionDto.getUserId();
 
         if (transactionDto.getTransactionType() == TransactionType.DEBIT) {
@@ -56,6 +158,7 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
                 throw new IllegalArgumentException("Either userId or vehicleRegId must be provided for DEBIT transactions.");
             }
         }
+
         SparePart sparePart = sparePartRepository.findByPartNumberAndManufacturer(
                         transactionDto.getPartNumber(), transactionDto.getManufacturer())
                 .orElseThrow(() -> new IllegalArgumentException("Spare part not found with Part Number: " + transactionDto.getPartNumber()));
@@ -80,15 +183,19 @@ public class SparePartTransactionServiceImpl implements SparePartTransactionServ
             if (!existingVendorPart.isPresent()) {
                 // If VendorPart doesn't exist, create a new one using information from SparePart
                 VendorPart newVendorPart = new VendorPart();
-                newVendorPart.setVendor(transactionDto.getName());
+                newVendorPart.setVendor(transactionDto.getName());  // vendor name from the dto
                 newVendorPart.setPartNumber(sparePart.getPartNumber());
                 newVendorPart.setPartName(sparePart.getPartName());
-                newVendorPart.setDescription(sparePart.getDescription());
                 newVendorPart.setManufacturer(sparePart.getManufacturer());
+                newVendorPart.setPrice(sparePart.getPrice());
+                newVendorPart.setCGST(sparePart.getCGST());
+                newVendorPart.setSGST(sparePart.getSGST());
+                newVendorPart.setTotalGST(sparePart.getCGST() + sparePart.getSGST());
                 vendorPartRepository.save(newVendorPart);
             }
         }
 
+        // Validations for CREDIT and DEBIT
         if (transactionDto.getTransactionType() == TransactionType.CREDIT &&
                 (transactionDto.getBillNo() == null || transactionDto.getBillNo().trim().isEmpty())) {
             throw new IllegalArgumentException("Bill number is required for CREDIT transactions.");

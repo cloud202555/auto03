@@ -21,6 +21,18 @@ public class SparePartController {
 
     private final SparePartService sparePartService;
 
+//    @GetMapping("/photo/{id}")
+//    public ResponseEntity<byte[]> getPhoto(@PathVariable Integer id) {
+//        byte[] image = sparePartService.getPhotoById(id);
+//        if (image == null) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        return ResponseEntity.ok()
+//                .contentType(MediaType.IMAGE_JPEG)
+//                .body(image);
+//    }
+
     @GetMapping("/getPartById/{id}")
     public ResponseEntity<SparePartDto> getSparePartById(@PathVariable Integer id) {
         SparePartDto sparePart = sparePartService.getSparePartById(id);
@@ -52,15 +64,14 @@ public class SparePartController {
             @RequestParam("sGST") Integer sGST,
             @RequestParam("cGST") Integer cGST,
             @RequestParam("totalGST") Integer totalGST,
-            @RequestParam("buyingPrice") Integer buyingPrice,
-            @RequestParam("vendor") String vendor) {
+            @RequestParam("buyingPrice") Integer buyingPrice)
+             {
 
         BaseResponseDTO response = sparePartService.addPart(
-                partName, description, manufacturer, price, partNumber, photos, sGST, cGST, totalGST, buyingPrice,vendor);
+                partName, description, manufacturer, price, partNumber, photos, sGST, cGST, totalGST, buyingPrice);
 
         return ResponseEntity.ok(response);
     }
-
 
 
 
