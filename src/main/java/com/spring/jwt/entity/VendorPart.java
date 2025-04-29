@@ -36,26 +36,8 @@ public class VendorPart {
     @Column(name = "manufacturer", nullable = false)
     private String manufacturer;
 
-    @Column(name = "price", nullable = false)
-    private Long price;
-
-    @Column(name = "update_At", nullable = false)
-    private LocalDate updateAt;
-
     @Column(name = "part_number", nullable = false)
     private String partNumber;
-
-    @Column
-    private Integer cGST;
-
-    @Column
-    private Integer sGST;
-
-    @Column
-    private Integer totalGST;
-
-    @Column
-    private Integer buyingPrice;
 
     @Column(nullable = false)
     private String vendor;
