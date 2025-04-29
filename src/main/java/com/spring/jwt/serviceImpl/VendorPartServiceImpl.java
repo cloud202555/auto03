@@ -36,13 +36,7 @@ public class VendorPartServiceImpl implements VendorPartService {
         existing.setPartName(dto.getPartName());
         existing.setDescription(dto.getDescription());
         existing.setManufacturer(dto.getManufacturer());
-        existing.setPrice(dto.getPrice());
-        existing.setUpdateAt(LocalDate.now());
         existing.setPartNumber(dto.getPartNumber());
-        existing.setCGST(dto.getCGST());
-        existing.setSGST(dto.getSGST());
-        existing.setTotalGST(dto.getTotalGST());
-        existing.setBuyingPrice(dto.getBuyingPrice());
         existing.setVendor(dto.getVendor());
 
         VendorPart updated = vendorPartRepository.save(existing);
@@ -87,31 +81,19 @@ public class VendorPartServiceImpl implements VendorPartService {
                 .partName(entity.getPartName())
                 .description(entity.getDescription())
                 .manufacturer(entity.getManufacturer())
-                .price(entity.getPrice())
-                .updateAt(entity.getUpdateAt())
                 .partNumber(entity.getPartNumber())
-                .cGST(entity.getCGST())
-                .sGST(entity.getSGST())
-                .totalGST(entity.getTotalGST())
-                .buyingPrice(entity.getBuyingPrice())
                 .vendor(entity.getVendor())
                 .build();
     }
 
     private VendorPart mapToEntity(VendorPartDto dto) {
         return VendorPart.builder()
-                .vendorPartId(dto.getVendorPartId()) // Only set this in update
+                .vendorPartId(dto.getVendorPartId())
                 .sparePartId(dto.getSparePartId())
                 .partName(dto.getPartName())
                 .description(dto.getDescription())
                 .manufacturer(dto.getManufacturer())
-                .price(dto.getPrice())
-                .updateAt(dto.getUpdateAt() != null ? dto.getUpdateAt() : LocalDate.now())
                 .partNumber(dto.getPartNumber())
-                .cGST(dto.getCGST())
-                .sGST(dto.getSGST())
-                .totalGST(dto.getTotalGST())
-                .buyingPrice(dto.getBuyingPrice())
                 .vendor(dto.getVendor())
                 .build();
     }
