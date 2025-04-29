@@ -27,6 +27,8 @@ public class VendorPartDto {
 
     private String partNumber;
 
+    private Integer vendorId;
+
     private Integer cGST;
 
     private Integer sGST;

@@ -3,11 +3,15 @@ package com.spring.jwt.controller;
 import com.spring.jwt.dto.VendorPartDto;
 import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.service.VendorPartService;
+import com.spring.jwt.vender.ResponseAllVendorDto;
+import com.spring.jwt.vender.VendorDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.spring.jwt.Appointment.ResponseDto;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -102,9 +106,9 @@ public class VendorPartController {
     }
 
     @GetMapping("/get-by-part-number")
-    public ResponseEntity<ResponseDto<List<VendorPartDto>>> getByPartNumber(@RequestParam String partNumber) {
+    public ResponseEntity<ResponseDto<List<VendorPartDto>>> getByPartNumber(@RequestParam String partNumber, @RequestParam String manufacturer) {
         try {
-            List<VendorPartDto> parts = vendorPartService.getByPartNumber(partNumber);
+            List<VendorPartDto> parts = vendorPartService.getByPartNumber(partNumber, manufacturer);
             return ResponseEntity.ok(
                     new ResponseDto<>("Vendor parts with part number fetched", parts, null)
             );
@@ -116,6 +120,40 @@ public class VendorPartController {
             return ResponseEntity.status(500).body(
                     new ResponseDto<>("Failed to fetch Vendor parts", null, e.getMessage())
             );
+        }
+    }
+
+
+    @GetMapping("/vendors")
+    public ResponseEntity<ResponseAllVendorDto> getVendorsByPart(
+            @RequestParam String partNumber,
+            @RequestParam String manufacturer
+    ) {
+        try {
+            // Service signature is (partNumber, manufacturer)
+            List<VendorDto> vendors = vendorPartService
+                    .getVendorsByPartNumberAndManufacturer(partNumber, manufacturer);
+
+            ResponseAllVendorDto dto = new ResponseAllVendorDto();
+            dto.setVendors(vendors);
+            dto.setMessage("Vendors for part fetched successfully");
+            return ResponseEntity.ok(dto);
+
+        } catch (ResourceNotFoundException rnfe) {
+            ResponseAllVendorDto dto = new ResponseAllVendorDto();
+            dto.setVendors(Collections.emptyList());
+            dto.setMessage("No matching vendors found: " + rnfe.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(dto);
+
+        } catch (Exception e) {
+            ResponseAllVendorDto dto = new ResponseAllVendorDto();
+            dto.setVendors(Collections.emptyList());
+            dto.setMessage("Failed to fetch vendors: " + e.getMessage());
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(dto);
         }
     }
 }

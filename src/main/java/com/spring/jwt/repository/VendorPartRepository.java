@@ -9,5 +9,7 @@ import java.util.Optional;
 public interface VendorPartRepository extends JpaRepository<VendorPart, Integer> {
     Optional<VendorPart> findByVendorAndPartNumber(String vendor, String partNumber);
 
-    List<VendorPart> findByPartNumber(String partNumber);
-}
+    List<VendorPart> findByManufacturerAndPartNumber(
+            String manufacturer,
+            String partNumber
+    );}
