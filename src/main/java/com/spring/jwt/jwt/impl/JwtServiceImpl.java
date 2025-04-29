@@ -98,7 +98,6 @@ public class JwtServiceImpl implements JwtService {
         log.info("firstName: {}", firstName);
         log.info("userId: {}", userId);
 
-
         return Jwts.builder()
                 .setSubject(userDetailsCustom.getUsername())
                 .claim("firstname", firstName)
@@ -155,7 +154,6 @@ public class JwtServiceImpl implements JwtService {
 
         return claims;
     }
-
 
 }
 
