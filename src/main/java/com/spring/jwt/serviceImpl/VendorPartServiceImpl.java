@@ -1,17 +1,22 @@
 package com.spring.jwt.serviceImpl;
 
 
+import com.spring.jwt.MapperClasses.VendorMapper;
 import com.spring.jwt.dto.VendorPartDto;
 import com.spring.jwt.entity.VendorPart;
 import com.spring.jwt.exception.ResourceNotFoundException;
 import com.spring.jwt.repository.VendorPartRepository;
 import com.spring.jwt.service.VendorPartService;
+import com.spring.jwt.vender.Vendor;
+import com.spring.jwt.vender.VendorDto;
+import com.spring.jwt.vender.VendorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +25,12 @@ public class VendorPartServiceImpl implements VendorPartService {
     @Autowired
     private VendorPartRepository vendorPartRepository;
 
+    @Autowired
+    private VendorRepository vendorRepository;
+
+    @Autowired
+
+    private VendorMapper vendorMapper;
     @Override
     public VendorPartDto create(VendorPartDto vendorPartDto) {
         VendorPart vendorPart = mapToEntity(vendorPartDto);
@@ -36,13 +47,7 @@ public class VendorPartServiceImpl implements VendorPartService {
         existing.setPartName(dto.getPartName());
         existing.setDescription(dto.getDescription());
         existing.setManufacturer(dto.getManufacturer());
-        existing.setPrice(dto.getPrice());
-        existing.setUpdateAt(LocalDate.now());
         existing.setPartNumber(dto.getPartNumber());
-        existing.setCGST(dto.getCGST());
-        existing.setSGST(dto.getSGST());
-        existing.setTotalGST(dto.getTotalGST());
-        existing.setBuyingPrice(dto.getBuyingPrice());
         existing.setVendor(dto.getVendor());
 
         VendorPart updated = vendorPartRepository.save(existing);
@@ -71,15 +76,14 @@ public class VendorPartServiceImpl implements VendorPartService {
     }
 
     @Override
-    public List<VendorPartDto> getByPartNumber(String partNumber) {
-        List<VendorPart> parts = vendorPartRepository.findByPartNumber(partNumber);
+    public List<VendorPartDto> getByPartNumber(String partNumber, String manufacturer) {
+        List<VendorPart> parts = vendorPartRepository.findByManufacturerAndPartNumber(partNumber, manufacturer);
         if (parts.isEmpty()) {
             throw new ResourceNotFoundException("No VendorParts found with part number: " + partNumber);
         }
         return parts.stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
-    // Helper methods
     private VendorPartDto mapToDto(VendorPart entity) {
         return VendorPartDto.builder()
                 .vendorPartId(entity.getVendorPartId())
@@ -87,33 +91,61 @@ public class VendorPartServiceImpl implements VendorPartService {
                 .partName(entity.getPartName())
                 .description(entity.getDescription())
                 .manufacturer(entity.getManufacturer())
-                .price(entity.getPrice())
-                .updateAt(entity.getUpdateAt())
                 .partNumber(entity.getPartNumber())
-                .cGST(entity.getCGST())
-                .sGST(entity.getSGST())
-                .totalGST(entity.getTotalGST())
-                .buyingPrice(entity.getBuyingPrice())
                 .vendor(entity.getVendor())
+                .vendorId(entity.getVendorId())
+                .vendorId(entity.getVendorId())
                 .build();
     }
 
     private VendorPart mapToEntity(VendorPartDto dto) {
         return VendorPart.builder()
-                .vendorPartId(dto.getVendorPartId()) // Only set this in update
+                .vendorPartId(dto.getVendorPartId())
                 .sparePartId(dto.getSparePartId())
                 .partName(dto.getPartName())
+                .vendorId(dto.getVendorId())
                 .description(dto.getDescription())
                 .manufacturer(dto.getManufacturer())
-                .price(dto.getPrice())
-                .updateAt(dto.getUpdateAt() != null ? dto.getUpdateAt() : LocalDate.now())
                 .partNumber(dto.getPartNumber())
-                .cGST(dto.getCGST())
-                .sGST(dto.getSGST())
-                .totalGST(dto.getTotalGST())
-                .buyingPrice(dto.getBuyingPrice())
                 .vendor(dto.getVendor())
                 .build();
     }
 
+    @Override
+    public List<VendorDto> getVendorsByPartNumberAndManufacturer(
+            String partNumber,
+            String manufacturer
+    ) {
+        // fetch parts by (manufacturer, partNumber)
+        List<VendorPart> parts = vendorPartRepository
+                .findByManufacturerAndPartNumber(manufacturer, partNumber);
+
+        if (parts.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No VendorParts found for partNumber="
+                            + partNumber
+                            + ", manufacturer="
+                            + manufacturer
+            );
+        }
+
+        // extract distinct vendor IDs
+        Set<Integer> vendorIds = parts.stream()
+                .map(VendorPart::getVendorId)
+                .collect(Collectors.toSet());
+
+        // load vendor entities in one shot
+        List<Vendor> vendors = vendorRepository.findAllById(vendorIds);
+
+        if (vendors.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No Vendors found for vendorIds=" + vendorIds
+            );
+        }
+
+        // map to DTOs
+        return vendors.stream()
+                .map(vendorMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }
