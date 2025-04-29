@@ -9,7 +9,6 @@ import com.spring.jwt.jwt.JwtService;
 import com.spring.jwt.service.security.UserDetailsServiceCustom;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,10 +46,6 @@ public class AppConfig {
     @Lazy
     private JwtService jwtService;
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 
     @Bean
     public JwtConfig jwtConfig() {
